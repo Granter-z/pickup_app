@@ -55,18 +55,23 @@ class TextNormalizer {
   }
 
   /// 生成 Package 的 transit 指纹
-  /// 
-  /// 基于 courier + normalizedText
-  /// 返回 null 如果数据不足以生成有效指纹
-  static String? transitFingerprint(String courierName, String rawText) {
+  ///
+  /// 基于 courier + trackingNumber + normalizedText
+  /// trackingNumber 确保不同单号不会产生相同 fingerprint
+  static String? transitFingerprint(
+    String courierName,
+    String rawText, {
+    String? trackingNumber,
+  }) {
     final normalized = normalize(rawText);
-    
+
     // 安全保护：避免 OCR 异常导致 fingerprint 全部相同
     if (courierName.isEmpty || normalized.length < 5) {
       return null;
     }
-    
-    final combined = '$courierName|$normalized';
+
+    final trackingPart = trackingNumber ?? '';
+    final combined = '$courierName|$trackingPart|$normalized';
     final bytes = utf8.encode(combined);
     final hash = md5.convert(bytes);
     return hash.toString();

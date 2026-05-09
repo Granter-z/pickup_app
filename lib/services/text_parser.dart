@@ -40,6 +40,7 @@ class TextParser {
       final fingerprint = TextNormalizer.transitFingerprint(
         results[i].courier.value.toString().split('.').last,
         text,
+        trackingNumber: results[i].trackingNumber.value,
       );
       DebugTrace.normalizedText(text, normalized, fingerprint ?? '(null)');
     }

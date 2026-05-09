@@ -8,6 +8,7 @@
 library;
 
 import '../models/package.dart';
+import '../models/package_status.dart';
 import 'text_preprocessor.dart';
 import 'extractors.dart';
 import 'parse_result.dart';
@@ -83,8 +84,19 @@ class TextParser {
       confidence: locationResult.confidence,
       source: locationResult.source,
     );
-    final status = StatusExtractor.extract(raw);
-    
+    var status = StatusExtractor.extract(raw);
+
+    // 取件码存在 → 状态不可能是"已取件"
+    // 有取件码 = 包裹在驿站等你取，不是已取走
+    if (pickupCode.value.isNotEmpty &&
+        status.value == PackageStatus.pickedUp) {
+      status = ExtractionResult(
+        value: PackageStatus.arrived,
+        confidence: 0.95,
+        source: 'pickup_code_override',
+      );
+    }
+
     final warnings = <String>[];
     
     // 计算总体置信度

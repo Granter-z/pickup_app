@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../main.dart';
 import '../core/debug/debug_trace.dart';
+import '../core/debug/metrics.dart';
 import '../models/package_model.dart';
 import '../core/models/pending_confirmation.dart';
 import '../services/hero_decision_service.dart';
@@ -67,11 +68,12 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
   void addPackage(Package package) {
     DebugTrace.separator('ADD PACKAGE START');
     print('incoming: courier=${package.courier.displayName} '
-        'tracking=${package.trackingNumber} '
+        'tracking="${package.trackingNumber}" '
         'code=${package.pickupCode} '
         'location=${package.location} '
         'status=${package.status.label} '
         'fingerprint=${package.transitFingerprint}');
+    print('state before: ${state.length} packages');
 
     // ── Step 1: Dedupe ───────────────────────────────────────
     final existingIndex = _findExistingPackage(package);
@@ -85,7 +87,6 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
           'status=${existing.status.label} '
           'notifiedArrived=${existing.notifiedArrived}');
 
-      // 状态只能前进，不能倒退
       final resolvedStatus = _resolveStatus(existing.status, package.status);
 
       final updated = existing.copyWith(
@@ -123,9 +124,8 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     }
 
     // ── Step 3: Persist ──────────────────────────────────────
-    DebugTrace.separator('SAVE TO HIVE');
     _sync();
-    print('state.length: ${state.length}');
+    print('state after: ${state.length} packages');
 
     DebugTrace.separator('ADD PACKAGE COMPLETE');
   }
@@ -147,6 +147,11 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     notificationService.scheduleReminderNotification(package);
   }
   
+  /// 规范化 trackingNumber：去首尾空格、合并内部空格、统一小写
+  static String _normalizeTracking(String raw) {
+    return raw.trim().replaceAll(RegExp(r'\s+'), '').toLowerCase();
+  }
+
   /// 查找已存在的相同包裹
   ///
   /// Tracking-first identity system：
@@ -156,18 +161,30 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
   int _findExistingPackage(Package package) {
     DebugTrace.separator('DEDUPE CHECK');
 
+    // ── Dump current state ────────────────────────────────────
+    print('state.length: ${state.length}');
+    for (var i = 0; i < state.length; i++) {
+      final p = state[i];
+      print('  [$i] id=${p.id} tracking="${p.trackingNumber}" '
+          'code=${p.pickupCode} status=${p.status.label}');
+    }
+
     // ── Priority 1: trackingNumber ────────────────────────────
-    if (package.trackingNumber.isNotEmpty) {
-      print('Priority 1: trackingNumber=${package.trackingNumber}');
-      final index = state.indexWhere((p) =>
-          p.trackingNumber.isNotEmpty &&
-          p.trackingNumber == package.trackingNumber);
+    final incomingTracking = _normalizeTracking(package.trackingNumber);
+    if (incomingTracking.isNotEmpty) {
+      print('Priority 1: trackingNumber="${package.trackingNumber}" '
+          '→ normalized="$incomingTracking"');
+      final index = state.indexWhere((p) {
+        final existing = _normalizeTracking(p.trackingNumber);
+        return existing.isNotEmpty && existing == incomingTracking;
+      });
 
       if (index != -1) {
+        Metrics.inc('dedupe.hit');
         print('→ HIT: index=$index id=${state[index].id}');
         return index;
       }
-      print('→ miss');
+      print('→ miss (no state entry matches)');
     }
 
     // ── Priority 2: pickupCode + location ─────────────────────
@@ -178,6 +195,7 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
           p.location == package.location);
 
       if (index != -1) {
+        Metrics.inc('dedupe.hit');
         print('→ HIT: index=$index id=${state[index].id}');
         return index;
       }
@@ -193,6 +211,7 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
           p.transitFingerprint == fingerprint);
 
       if (index != -1) {
+        Metrics.inc('dedupe.hit');
         print('→ HIT: index=$index id=${state[index].id}');
         return index;
       }
@@ -200,7 +219,8 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     }
 
     // ── No match ─────────────────────────────────────────────
-    print('→ NO MATCH');
+    Metrics.inc('dedupe.miss');
+    print('→ NO MATCH (all priorities exhausted)');
     return -1;
   }
   
@@ -256,15 +276,28 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     _sync();
   }
 
+  /// 清除所有已完成（已取件 + 已归档）的包裹
+  void clearCompleted() {
+    state = state.where((p) => !p.status.isCompleted).toList();
+    _sync();
+  }
+
   void _sync() {
     final box = _box;
-    if (box == null) {
-      print('_sync: Hive box not available, skipping persistence');
-      return;
-    }
-    box.clear();
+    if (box == null) return;
+
+    // Write-through: put all current packages
+    final stateIds = <String>{};
     for (final p in state) {
+      stateIds.add(p.id);
       box.put(p.id, HivePackage.fromPackage(p));
+    }
+
+    // Remove packages no longer in state
+    for (final key in box.keys.toList()) {
+      if (!stateIds.contains(key)) {
+        box.delete(key);
+      }
     }
   }
 }

@@ -1,5 +1,6 @@
 import 'package:uuid/uuid.dart';
 import '../core/debug/debug_trace.dart';
+import '../core/debug/metrics.dart';
 import '../core/models/package.dart';
 import '../core/parser/conflict_detector.dart';
 import '../core/parser/parse_result.dart';
@@ -47,9 +48,11 @@ class PackageOcrService {
   static Future<OcrParseResult> parseToConfirmations(String imagePath) async {
     final rawText = await OcrService.recognizeFromImage(imagePath);
 
+    Metrics.inc('ocr.attempt');
+
     if (rawText.isEmpty) {
-      DebugTrace.separator('PARSE SKIPPED');
-      print('reason: rawText is empty');
+      Metrics.inc('abort.empty');
+      DebugTrace.abort('rawText empty');
       return OcrParseResult.empty();
     }
 
@@ -80,10 +83,17 @@ class PackageOcrService {
       print('arrivalKeywords: ${conflictResult.detectedArrivalKeywords}');
     }
 
+    // ── 轻量熔断：Dashboard / 首页截图 ─────────────────────
+    if (TextSanitizer.shouldAbortParse(sanitizedText)) {
+      Metrics.inc('abort.dashboard');
+      DebugTrace.abort('dashboard_like_screen');
+      return OcrParseResult.empty();
+    }
+
     // 使用核心 Parser 解析（基于清理后的文本）
     DebugTrace.separator('PARSING START');
     print('sanitizedText length: ${sanitizedText.length}');
-    
+
     final coreParser = _getCoreParser();
     final parseResults = coreParser.parseMulti(sanitizedText);
     
@@ -104,7 +114,10 @@ class PackageOcrService {
         // 打印规范化文本和指纹
         final courierName = result.courier.value.toString().split('.').last;
         final normalized = TextNormalizer.normalize(rawText);
-        final fingerprint = TextNormalizer.transitFingerprint(courierName, rawText);
+        final fingerprint = TextNormalizer.transitFingerprint(
+          courierName, rawText,
+          trackingNumber: result.trackingNumber.value,
+        );
         DebugTrace.normalizedText(rawText, normalized, fingerprint ?? '(null)');
 
         // 判断是否应该自动入库
@@ -150,9 +163,11 @@ class PackageOcrService {
       }
     }
 
-    DebugTrace.separator('OCR PARSE RESULT SUMMARY');
-    print('highConfidence: ${highConfidence.length}');
-    print('lowConfidence: ${lowConfidence.length}');
+    if (highConfidence.isNotEmpty || lowConfidence.isNotEmpty) {
+      Metrics.inc('parse.success');
+    } else {
+      Metrics.inc('parse.fail');
+    }
 
     return OcrParseResult(
       highConfidencePackages: highConfidence,
@@ -164,7 +179,10 @@ class PackageOcrService {
   static Package _parseResultToPackage(dynamic result, String id, String rawText) {
     // 生成 transit fingerprint
     final courierName = result.courier.value.toString().split('.').last;
-    final fingerprint = TextNormalizer.transitFingerprint(courierName, rawText);
+    final fingerprint = TextNormalizer.transitFingerprint(
+      courierName, rawText,
+      trackingNumber: result.trackingNumber.value,
+    );
     
     DebugTrace.packageCreated(Package(
       id: id,

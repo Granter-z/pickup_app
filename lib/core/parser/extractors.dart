@@ -35,12 +35,16 @@ class CourierExtractor {
     var maxLen = 0;
     bool isSpecific = false;
 
-    for (final entry in CourierDictionary.platformAliases.entries) {
+    // 按 key 长度降序，确保长别名优先匹配
+    final sorted = CourierDictionary.platformAliases.entries.toList()
+      ..sort((a, b) => b.key.length.compareTo(a.key.length));
+
+    for (final entry in sorted) {
       if (!lower.contains(entry.key.toLowerCase())) continue;
-      
+
       final isSpecificMatch = CourierDictionary.specificCouriers
           .any((s) => entry.key.contains(s) || s.contains(entry.key));
-      
+
       if (isSpecificMatch || entry.key.length > maxLen) {
         maxLen = isSpecificMatch ? 999 : entry.key.length;
         found = entry.value;

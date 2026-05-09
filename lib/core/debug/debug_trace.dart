@@ -1,88 +1,113 @@
 /// Debug 追踪工具
-/// 
-/// 职责：
-/// 1. 在关键层打印调试信息
-/// 2. 帮助定位识别失败的原因
+///
+/// compact: 每个事件一行，方便 grep
+/// verbose: 完整输出，开发时使用
 library;
 
 import '../models/package.dart';
 import '../models/package_status.dart';
 import '../parser/parse_result.dart';
 
-/// Debug 追踪器
+enum DebugLevel { compact, verbose }
+
 class DebugTrace {
   static bool enabled = true;
+  static DebugLevel level = DebugLevel.compact;
 
-  /// 打印分隔线
+  // ── 基础工具 ─────────────────────────────────────────────
+
   static void separator(String label) {
     if (!enabled) return;
-    print('');
-    print('═══════════════════════════════════════════════════');
-    print('  $label');
-    print('═══════════════════════════════════════════════════');
+    if (level == DebugLevel.verbose) {
+      print('');
+      print('═══════════════════════════════════════════════════');
+      print('  $label');
+      print('═══════════════════════════════════════════════════');
+    }
   }
 
-  /// 打印 OCR 结果
-  static void ocrResult(String rawText) {
+  static void error(String message, {Object? error, StackTrace? stackTrace}) {
     if (!enabled) return;
-    separator('OCR RESULT');
-    print('rawText:');
-    print('  ${rawText.isEmpty ? "(empty)" : rawText}');
-    print('  length: ${rawText.length}');
+    print('ERROR: $message');
+    if (error != null) print('  error: $error');
+    if (stackTrace != null && level == DebugLevel.verbose) {
+      print('  stack: $stackTrace');
+    }
   }
 
-  /// 打印 Parser 结果
-  static void parseResult(ParseResult result, {int? index}) {
+  // ── Pipeline 事件 ────────────────────────────────────────
+
+  static void ocr(String rawText) {
     if (!enabled) return;
-    separator('PARSE RESULT ${index != null ? "#$index" : ""}');
-    
-    print('courier:');
-    print('  value: ${result.courier.value.displayName}');
-    print('  confidence: ${result.courier.confidence}');
-    print('  source: ${result.courier.source}');
-    
-    print('pickupCode:');
-    print('  value: ${result.pickupCode.value.isEmpty ? "(empty)" : result.pickupCode.value}');
-    print('  confidence: ${result.pickupCode.confidence}');
-    print('  source: ${result.pickupCode.source}');
-    
-    print('trackingNumber:');
-    print('  value: ${result.trackingNumber.value.isEmpty ? "(empty)" : result.trackingNumber.value}');
-    print('  confidence: ${result.trackingNumber.confidence}');
-    
-    print('location:');
-    print('  value: ${result.location.value.isEmpty ? "(empty)" : result.location.value}');
-    print('  confidence: ${result.location.confidence}');
-    print('  source: ${result.location.source}');
-    
-    print('status:');
-    print('  value: ${result.status.value.label}');
-    print('  confidence: ${result.status.confidence}');
-    print('  source: ${result.status.source}');
-    
-    print('overallConfidence: ${result.overallConfidence}');
-    
-    if (result.allWarnings.isNotEmpty) {
-      print('warnings:');
-      for (final w in result.allWarnings) {
-        print('  - $w');
+    if (level == DebugLevel.verbose) {
+      separator('OCR RESULT');
+      print('rawText:\n  $rawText\n  length: ${rawText.length}');
+    }
+  }
+
+  static void parse(ParseResult result, {int? index}) {
+    if (!enabled) return;
+    final tag = index != null ? '#$index' : '';
+    if (level == DebugLevel.compact) {
+      print('PARSE$tag: courier=${result.courier.value.displayName} '
+          'tracking=${result.trackingNumber.value} '
+          'status=${result.status.value.label} '
+          'conf=${result.overallConfidence.toStringAsFixed(2)}');
+    } else {
+      separator('PARSE RESULT $tag');
+      print('courier: ${result.courier.value.displayName} '
+          '(${result.courier.confidence}, ${result.courier.source})');
+      print('pickupCode: ${result.pickupCode.value} '
+          '(${result.pickupCode.confidence})');
+      print('trackingNumber: ${result.trackingNumber.value} '
+          '(${result.trackingNumber.confidence})');
+      print('location: ${result.location.value} '
+          '(${result.location.confidence}, ${result.location.source})');
+      print('status: ${result.status.value.label} '
+          '(${result.status.confidence}, ${result.status.source})');
+      print('overallConfidence: ${result.overallConfidence}');
+      print('isValid: ${result.isValid} canCreatePackage: ${result.canCreatePackage}');
+      if (result.allWarnings.isNotEmpty) {
+        for (final w in result.allWarnings) {
+          print('  warning: $w');
+        }
       }
     }
-    
-    print('isValid: ${result.isValid}');
-    print('canCreatePackage: ${result.canCreatePackage}');
   }
 
-  /// 打印规范化文本
-  static void normalizedText(String original, String normalized, String fingerprint) {
+  static void abort(String reason) {
     if (!enabled) return;
+    print('ABORT: $reason');
+  }
+
+  static void dedupe({required String method, required bool hit, String? tracking}) {
+    if (!enabled) return;
+    print('DEDUPE: method=$method hit=$hit tracking=${tracking ?? ""}');
+  }
+
+  static void merge(String existingId, String incomingTracking) {
+    if (!enabled) return;
+    print('MERGE: existing=$existingId incoming=$incomingTracking');
+  }
+
+  // ── 保留的详细输出（verbose only）────────────────────────
+
+  static void ocrResult(String rawText) {
+    if (!enabled || level != DebugLevel.verbose) return;
+    separator('OCR RESULT');
+    print('rawText:\n  $rawText\n  length: ${rawText.length}');
+  }
+
+  static void parseResult(ParseResult result, {int? index}) => parse(result, index: index);
+
+  static void normalizedText(String original, String normalized, String fingerprint) {
+    if (!enabled || level != DebugLevel.verbose) return;
     separator('NORMALIZED TEXT');
     print('original: $original');
     print('normalized: $normalized');
     print('fingerprint: $fingerprint');
   }
 
-  /// 打印去重结果
   static void dedupeResult({
     required String method,
     required bool isDuplicate,
@@ -91,28 +116,26 @@ class DebugTrace {
     String? reason,
   }) {
     if (!enabled) return;
-    separator('DEDUPE RESULT');
-    print('method: $method');
-    print('isDuplicate: $isDuplicate');
-    if (existingIndex != null) print('existingIndex: $existingIndex');
-    if (existingId != null) print('existingId: $existingId');
-    if (reason != null) print('reason: $reason');
+    dedupe(method: method, hit: isDuplicate, tracking: reason);
   }
 
-  /// 打印 Package 创建
   static void packageCreated(Package package) {
     if (!enabled) return;
-    separator('PACKAGE CREATED');
-    print('id: ${package.id}');
-    print('courier: ${package.courier.displayName}');
-    print('trackingNumber: ${package.trackingNumber}');
-    print('pickupCode: ${package.pickupCode.isEmpty ? "(empty)" : package.pickupCode}');
-    print('location: ${package.location.isEmpty ? "(empty)" : package.location}');
-    print('status: ${package.status.label}');
-    print('transitFingerprint: ${package.transitFingerprint ?? "(null)"}');
+    if (level == DebugLevel.compact) {
+      print('PACKAGE: id=${package.id} courier=${package.courier.displayName} '
+          'tracking=${package.trackingNumber} status=${package.status.label}');
+    } else {
+      separator('PACKAGE CREATED');
+      print('id: ${package.id}');
+      print('courier: ${package.courier.displayName}');
+      print('trackingNumber: ${package.trackingNumber}');
+      print('pickupCode: ${package.pickupCode.isEmpty ? "(empty)" : package.pickupCode}');
+      print('location: ${package.location.isEmpty ? "(empty)" : package.location}');
+      print('status: ${package.status.label}');
+      print('transitFingerprint: ${package.transitFingerprint ?? "(null)"}');
+    }
   }
 
-  /// 打印 PendingConfirmation 创建
   static void confirmationCreated({
     required String id,
     required double confidence,
@@ -122,21 +145,17 @@ class DebugTrace {
     required PackageStatus status,
   }) {
     if (!enabled) return;
-    separator('PENDING CONFIRMATION CREATED');
-    print('id: $id');
-    print('confidence: $confidence');
-    print('courier: ${courier.displayName}');
-    print('pickupCode: ${pickupCode.isEmpty ? "(empty)" : pickupCode}');
-    print('location: ${location.isEmpty ? "(empty)" : location}');
-    print('status: ${status.label}');
-  }
-
-  /// 打印错误
-  static void error(String message, {Object? error, StackTrace? stackTrace}) {
-    if (!enabled) return;
-    separator('ERROR');
-    print('message: $message');
-    if (error != null) print('error: $error');
-    if (stackTrace != null) print('stackTrace: $stackTrace');
+    if (level == DebugLevel.compact) {
+      print('CONFIRMATION: id=$id conf=${confidence.toStringAsFixed(2)} '
+          'courier=${courier.displayName} status=${status.label}');
+    } else {
+      separator('PENDING CONFIRMATION CREATED');
+      print('id: $id');
+      print('confidence: $confidence');
+      print('courier: ${courier.displayName}');
+      print('pickupCode: ${pickupCode.isEmpty ? "(empty)" : pickupCode}');
+      print('location: ${location.isEmpty ? "(empty)" : location}');
+      print('status: ${status.label}');
+    }
   }
 }

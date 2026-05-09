@@ -16,6 +16,31 @@ class CompletedSection extends ConsumerStatefulWidget {
 class _CompletedSectionState extends ConsumerState<CompletedSection> {
   bool _expanded = false;
 
+  void _showClearDialog(BuildContext context, int count) {
+    showCupertinoDialog(
+      context: context,
+      builder: (ctx) => CupertinoAlertDialog(
+        title: const Text('清除已完成'),
+        content: Text('确定清除 $count 件已完成的包裹？'),
+        actions: [
+          CupertinoDialogAction(
+            isDefaultAction: true,
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('取消'),
+          ),
+          CupertinoDialogAction(
+            isDestructiveAction: true,
+            onPressed: () {
+              Navigator.pop(ctx);
+              ref.read(packageListProvider.notifier).clearCompleted();
+            },
+            child: const Text('清除'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final completed = ref.watch(completedPackagesProvider);
@@ -44,14 +69,27 @@ class _CompletedSectionState extends ConsumerState<CompletedSection> {
                   ),
                 ],
               ),
-              AnimatedRotation(
-                turns: _expanded ? 0.5 : 0,
-                duration: const Duration(milliseconds: 200),
-                child: const Icon(
-                  CupertinoIcons.chevron_down,
-                  size: 18,
-                  color: AppColors.textTertiary,
-                ),
+              Row(
+                children: [
+                  GestureDetector(
+                    onTap: () => _showClearDialog(context, completed.length),
+                    child: const Icon(
+                      CupertinoIcons.delete,
+                      size: 18,
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                  const SizedBox(width: AppSpacing.md),
+                  AnimatedRotation(
+                    turns: _expanded ? 0.5 : 0,
+                    duration: const Duration(milliseconds: 200),
+                    child: const Icon(
+                      CupertinoIcons.chevron_down,
+                      size: 18,
+                      color: AppColors.textTertiary,
+                    ),
+                  ),
+                ],
               ),
             ],
           ),

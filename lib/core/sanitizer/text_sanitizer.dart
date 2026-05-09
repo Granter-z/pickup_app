@@ -102,6 +102,16 @@ class TextSanitizer {
   static bool hasValidLogisticsInfo(String text) {
     return LogisticsKeywords.containsLogistics(text);
   }
+
+  /// 轻量熔断：检测 Dashboard / 首页截图
+  ///
+  /// 条件：文本短 + 含导航词（首页/设置/路线/我的/消息中心）
+  /// 不依赖 ConflictAnalyzer，可独立测试
+  static bool shouldAbortParse(String sanitizedText) {
+    if (sanitizedText.length >= 50) return false;
+    const dashboardKeywords = ['首页', '设置', '路线', '我的', '消息中心'];
+    return dashboardKeywords.any((kw) => sanitizedText.contains(kw));
+  }
 }
 
 /// 清理结果
