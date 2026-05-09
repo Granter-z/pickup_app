@@ -9,6 +9,7 @@ library;
 import '../models/package.dart';
 import '../models/package_status.dart';
 import 'courier_dictionary.dart';
+import 'location_type.dart';
 import 'status_dictionary.dart';
 import 'regex_patterns.dart';
 import 'text_preprocessor.dart';
@@ -66,12 +67,38 @@ class CourierExtractor {
 
 /// 取件码提取器
 class PickupCodeExtractor {
+  /// 验证取件码是否有效
+  /// 禁止：纯字母开头、单独4位数字（可能是日期）
+  static bool _isValidPickupCode(String code) {
+    if (code.isEmpty) return false;
+    // 禁止纯字母开头（2个或更多字母）
+    if (RegExp(r'^[a-zA-Z]{2,}').hasMatch(code)) return false;
+    return true;
+  }
+  
+  /// 检查是否为“可疑的日期格式”
+  /// 如：0407, 0509, 1234
+  static bool _isSuspiciousDateCode(String code) {
+    // 纯4位数字，可能是日期（MMDD格式）
+    if (RegExp(r'^\d{4}$').hasMatch(code)) {
+      // 检查是否可能是日期（01-12月，01-31日）
+      final month = int.tryParse(code.substring(0, 2));
+      final day = int.tryParse(code.substring(2, 4));
+      if (month != null && day != null) {
+        if (month >= 1 && month <= 12 && day >= 1 && day <= 31) {
+          return true; // 可能是日期
+        }
+      }
+    }
+    return false;
+  }
+
   static ExtractionResult<String> extract(String text) {
     // Priority 1: 带标签的取件码
     final labelMatch = RegexPatterns.labeledPickupCode.firstMatch(text);
     if (labelMatch != null) {
       final code = labelMatch.group(1)!;
-      if (!RegExp(r'^\d{10,}$').hasMatch(code)) {
+      if (_isValidPickupCode(code) && !RegExp(r'^\d{10,}$').hasMatch(code)) {
         return ExtractionResult(
           value: code,
           confidence: 0.95,
@@ -84,7 +111,7 @@ class PickupCodeExtractor {
     final shortMatch = RegexPatterns.shortPickupCode.firstMatch(text);
     if (shortMatch != null) {
       final code = shortMatch.group(1)!;
-      if (!RegExp(r'^\d{10,}$').hasMatch(code)) {
+      if (_isValidPickupCode(code) && !RegExp(r'^\d{10,}$').hasMatch(code)) {
         return ExtractionResult(
           value: code,
           confidence: 0.9,
@@ -96,23 +123,59 @@ class PickupCodeExtractor {
     // Priority 3: Bay格式
     final bayMatch = RegexPatterns.bayFormatCode.firstMatch(text);
     if (bayMatch != null) {
-      return ExtractionResult(
-        value: bayMatch.group(0)!,
-        confidence: 0.85,
-        source: 'bay_format',
-      );
+      final code = bayMatch.group(0)!;
+      if (_isValidPickupCode(code)) {
+        return ExtractionResult(
+          value: code,
+          confidence: 0.85,
+          source: 'bay_format',
+        );
+      }
     }
 
     // Priority 4: 4-8位数字
+    // 收紧规则：
+    // 1. 禁止单独4位数字（可能是日期如0407）
+    // 2. 必须检查数字附近 10~20 字符内是否有取件码关键词
     for (final m in RegexPatterns.digitCode.allMatches(text)) {
       final code = m.group(1)!;
       final before = text.substring(0, m.start);
-      if (!RegexPatterns.trackingPrefix.hasMatch(before) &&
+      final after = text.substring(m.end);
+      
+      // 检查数字附近 20 字符内是否有取件码关键词
+      final contextBefore = before.length > 20 
+          ? before.substring(before.length - 20) 
+          : before;
+      final contextAfter = after.length > 20 
+          ? after.substring(0, 20) 
+          : after;
+      final context = '$contextBefore$code$contextAfter';
+      
+      final hasLabelContext = RegExp(r'(?:取件码|取货码|提取码|验证码|收件码|凭码)')
+          .hasMatch(context);
+      
+      // 如果没有关键词上下文，且是可疑日期格式，则拒绝
+      if (!hasLabelContext && _isSuspiciousDateCode(code)) {
+        continue; // 跳过这个匹配
+      }
+      
+      // 检查是否为客服电话、订单号等非取件码数字
+      final isNonPickupNumber = RegExp(r'(?:联系|客服|电话|热线|电话|订单|运单|物流问题)')
+          .hasMatch(context);
+      
+      if (isNonPickupNumber) {
+        continue; // 跳过客服电话等
+      }
+      
+      if (_isValidPickupCode(code) &&
+          !RegexPatterns.trackingPrefix.hasMatch(before) &&
           !RegexPatterns.courierPrefix.hasMatch(code)) {
+        // 没有上下文关键词时，大幅降低置信度
+        final confidence = hasLabelContext ? 0.8 : 0.3;
         return ExtractionResult(
           value: code,
-          confidence: 0.7,
-          source: 'digit_code',
+          confidence: confidence,
+          source: hasLabelContext ? 'digit_code_with_context' : 'digit_code_no_context',
         );
       }
     }
@@ -127,15 +190,52 @@ class PickupCodeExtractor {
 
 /// 取货地点提取器
 class LocationExtractor {
-  static ExtractionResult<String> extract(String text) {
+  /// 物流节点关键词（不是取件地点）
+  static const List<String> _logisticsNodeKeywords = [
+    '转运中心', '分拨中心', '集运仓', '物流园', '运输中心',
+    '分拣中心', '中转站', '配送中心',
+    '集散中心', '处理中心', '航空港',
+  ];
+
+  /// 取件站点关键词
+  static const List<String> _pickupStationKeywords = [
+    '菜鸟驿站', '菜鸟', '代收点', '丰巢', '快递柜',
+    '妈妈驿站', '驿站', '营业部', '网点', '自提点',
+    '服务点', '门店', '北门店', '南门店', '东门店', '西门店',
+  ];
+
+  /// 检查是否为物流节点（不是取件地点）
+  static bool _isLogisticsNode(String location) {
+    return _logisticsNodeKeywords.any((kw) => location.contains(kw));
+  }
+
+  /// 检查是否为取件站点
+  static bool _isPickupStation(String location) {
+    return _pickupStationKeywords.any((kw) => location.contains(kw));
+  }
+
+  /// 确定位置类型
+  static LocationType _determineLocationType(String location) {
+    if (_isLogisticsNode(location)) {
+      return LocationType.transitCenter;
+    }
+    if (_isPickupStation(location)) {
+      return LocationType.pickupStation;
+    }
+    return LocationType.unknown;
+  }
+
+  static LocationParseResult extractTyped(String text) {
     // Priority 1: 地点标题格式1
     final title1Match = RegexPatterns.locationTitle1.firstMatch(text);
     if (title1Match != null) {
       var loc = TextPreprocessor.cleanLocation(title1Match.group(1)!.trim());
       if (loc.length >= 6 && !TextPreprocessor.isAdText(loc)) {
-        return ExtractionResult(
+        final type = _determineLocationType(loc);
+        return LocationParseResult(
           value: loc,
-          confidence: 0.9,
+          type: type,
+          confidence: type == LocationType.pickupStation ? 0.9 : 0.3,
           source: 'title_pattern_1',
         );
       }
@@ -146,9 +246,11 @@ class LocationExtractor {
     if (title2Match != null) {
       var loc = TextPreprocessor.cleanLocation(title2Match.group(1)!.trim());
       if (loc.length >= 6 && !TextPreprocessor.isAdText(loc)) {
-        return ExtractionResult(
+        final type = _determineLocationType(loc);
+        return LocationParseResult(
           value: loc,
-          confidence: 0.85,
+          type: type,
+          confidence: type == LocationType.pickupStation ? 0.85 : 0.3,
           source: 'title_pattern_2',
         );
       }
@@ -161,24 +263,21 @@ class LocationExtractor {
       loc = loc.replaceFirst(RegexPatterns.arrivalPrefix, '').trim();
       loc = TextPreprocessor.cleanLocation(loc);
       if (loc.length >= 3 && !TextPreprocessor.isAdText(loc)) {
-        return ExtractionResult(
+        final type = _determineLocationType(loc);
+        return LocationParseResult(
           value: loc,
-          confidence: 0.8,
+          type: type,
+          confidence: type == LocationType.pickupStation ? 0.8 : 0.3,
           source: 'arrival_format',
         );
       }
     }
 
     // Priority 4: 关键词搜索
-    final keywords = [
-      '驿站', '营业部', '网点', '配送站', '自提点', '快递柜',
-      '店', '门面', '服务点', '代收点',
-    ];
-
     String? bestLocation;
     var bestLength = 0;
 
-    for (final kw in keywords) {
+    for (final kw in _pickupStationKeywords) {
       final idx = text.indexOf(kw);
       if (idx != -1) {
         final start = (idx - 30).clamp(0, text.length);
@@ -195,17 +294,24 @@ class LocationExtractor {
     }
 
     if (bestLocation != null) {
-      return ExtractionResult(
+      return LocationParseResult(
         value: bestLocation,
+        type: LocationType.pickupStation,
         confidence: 0.7,
         source: 'keyword_search',
       );
     }
 
+    return LocationParseResult.empty();
+  }
+
+  /// 向后兼容的提取方法
+  static ExtractionResult<String> extract(String text) {
+    final result = extractTyped(text);
     return ExtractionResult(
-      value: '',
-      confidence: 0.0,
-      source: 'no_match',
+      value: result.value,
+      confidence: result.confidence,
+      source: result.source,
     );
   }
 }
@@ -246,7 +352,8 @@ class TrackingNumberExtractor {
     for (final pattern in patterns) {
       final match = pattern.firstMatch(text);
       if (match != null) {
-        final number = match.group(1)!;
+        // 使用 group(0) 获取完整匹配（包含前缀）
+        final number = match.group(0)!;
         if (!RegexPatterns.phoneNumber.hasMatch(number)) {
           return ExtractionResult(
             value: number,
@@ -327,16 +434,26 @@ class PhoneTailExtractor {
 /// 
 /// 重要：单独的数字或取件码不足以推断为 arrived
 class StatusExtractor {
+  /// UI角标过滤正则
+  /// 匹配：待取件2、待取件 3、运输中2 等
+  static final _uiBadgeRegex = RegExp(r'(?:待取件|运输中|派送中|已取件|运送中)\s*\d+');
+  
   /// 提取状态
   static ExtractionResult<PackageStatus> extract(String text) {
-    // 第一步：尝试匹配高置信度关键词（stageMap）
-    final directMatch = _matchDirectKeywords(text);
+    // 第一步：过滤UI角标
+    final filteredText = text.replaceAll(_uiBadgeRegex, '');
+    
+    // 第二步：尝试匹配高置信度关键词（stageMap）
+    final directMatch = _matchDirectKeywords(filteredText);
     if (directMatch != null) {
       return directMatch;
     }
 
-    // 第二步：多信号验证
-    final signals = _analyzeSignals(text);
+    // 第三步：获取位置类型
+    final locationResult = LocationExtractor.extractTyped(filteredText);
+    
+    // 第四步：多信号验证
+    final signals = _analyzeSignals(filteredText, locationResult.type);
     return _determineBySignals(signals);
   }
 
@@ -365,7 +482,7 @@ class StatusExtractor {
   }
 
   /// 分析文本中的各种信号
-  static StatusSignals _analyzeSignals(String text) {
+  static StatusSignals _analyzeSignals(String text, LocationType locationType) {
     // 检查是否真的提取到了取件码（使用 PickupCodeExtractor）
     final pickupCodeResult = PickupCodeExtractor.extract(text);
     final hasExtractedPickupCode = pickupCodeResult.value.isNotEmpty && 
@@ -378,9 +495,13 @@ class StatusExtractor {
     // 这样可以避免误匹配时间、日期等数字
     final hasPickupCodeSignal = hasExtractedPickupCode && hasPickupCodeKeyword;
     
+    // 地点信号 = 包含地点关键词 AND 位置类型为取件站点
+    final hasLocationKeyword = _containsAny(text, StatusDictionary.locationSignals);
+    final hasLocationSignal = hasLocationKeyword && locationType == LocationType.pickupStation;
+    
     return StatusSignals(
       hasPickupCodeSignal: hasPickupCodeSignal,
-      hasLocationSignal: _containsAny(text, StatusDictionary.locationSignals),
+      hasLocationSignal: hasLocationSignal,
       hasArrivedSignal: _containsAny(text, StatusDictionary.arrivedSignals),
       hasPickupActionSignal: _containsAny(text, StatusDictionary.pickupActionSignals),
       hasPickedUpSignal: _containsAny(text, StatusDictionary.pickedUpSignals),
@@ -388,6 +509,7 @@ class StatusExtractor {
       hasTransitSignal: _containsAny(text, StatusDictionary.transitSignals),
       hasBayFormat: StatusDictionary.bayFormatRegex.hasMatch(text),
       hasDigitCode: StatusDictionary.digitCodeRegex.hasMatch(text),
+      locationType: locationType,
     );
   }
 
@@ -465,7 +587,7 @@ class StatusExtractor {
 /// 状态信号分析结果
 class StatusSignals {
   final bool hasPickupCodeSignal;   // 取件码信号（真的提取到了取件码 AND 包含关键词）
-  final bool hasLocationSignal;     // 驿站/地点信号
+  final bool hasLocationSignal;     // 驿站/地点信号（且位置类型为取件站点）
   final bool hasArrivedSignal;      // 已到达信号
   final bool hasPickupActionSignal; // 取件动作信号
   final bool hasPickedUpSignal;     // 已取件信号
@@ -473,6 +595,7 @@ class StatusSignals {
   final bool hasTransitSignal;      // 运送中信号
   final bool hasBayFormat;          // Bay 格式取件码
   final bool hasDigitCode;          // 纯数字取件码
+  final LocationType locationType;  // 位置类型
 
   const StatusSignals({
     required this.hasPickupCodeSignal,
@@ -484,6 +607,7 @@ class StatusSignals {
     required this.hasTransitSignal,
     required this.hasBayFormat,
     required this.hasDigitCode,
+    this.locationType = LocationType.unknown,
   });
 
   /// arrived 相关信号数量

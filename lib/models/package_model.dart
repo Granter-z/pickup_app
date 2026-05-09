@@ -32,6 +32,7 @@ class HivePackage {
   final DateTime? pickedUpAt;
   final bool notifiedArrived;
   final DateTime? archivedAt;
+  final String? transitFingerprint;  // transit 阶段的弱身份标识
 
   const HivePackage({
     required this.id,
@@ -46,6 +47,7 @@ class HivePackage {
     this.pickedUpAt,
     this.notifiedArrived = false,
     this.archivedAt,
+    this.transitFingerprint,
   });
 
   /// 从核心模型创建
@@ -63,6 +65,7 @@ class HivePackage {
       pickedUpAt: package.pickedUpAt,
       notifiedArrived: package.notifiedArrived,
       archivedAt: package.archivedAt,
+      transitFingerprint: package.transitFingerprint,
     );
   }
 
@@ -81,6 +84,7 @@ class HivePackage {
       pickedUpAt: pickedUpAt,
       notifiedArrived: notifiedArrived,
       archivedAt: archivedAt,
+      transitFingerprint: transitFingerprint,
     );
   }
 
@@ -97,6 +101,7 @@ class HivePackage {
     DateTime? pickedUpAt,
     bool? notifiedArrived,
     DateTime? archivedAt,
+    String? transitFingerprint,
   }) {
     return HivePackage(
       id: id ?? this.id,
@@ -111,6 +116,7 @@ class HivePackage {
       pickedUpAt: pickedUpAt ?? this.pickedUpAt,
       notifiedArrived: notifiedArrived ?? this.notifiedArrived,
       archivedAt: archivedAt ?? this.archivedAt,
+      transitFingerprint: transitFingerprint ?? this.transitFingerprint,
     );
   }
 }

@@ -10,9 +10,28 @@ import 'regex_patterns.dart';
 
 /// 文本预处理器
 class TextPreprocessor {
+  /// OCR错字映射表
+  static const Map<String, String> _ocrTypoMap = {
+    '极免': '极兔',
+    '極兔': '极兔',
+    '圓通': '圆通',
+    '韵逹': '韵达',
+    '韵達': '韵达',
+    '申逹': '申通',
+    '中逹': '中通',
+    '豐巢': '丰巢',
+    '順丰': '顺丰',
+    '順豐': '顺丰',
+  };
+
   /// 预处理文本
   static String preprocess(String text) {
     var cleaned = text;
+    
+    // OCR错字修正
+    for (final entry in _ocrTypoMap.entries) {
+      cleaned = cleaned.replaceAll(entry.key, entry.value);
+    }
     
     // 去除中文字符之间的空格（OCR常见artifact）
     cleaned = cleaned.replaceAllMapped(

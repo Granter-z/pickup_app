@@ -9,6 +9,7 @@ library;
 import '../models/package.dart';
 import '../models/package_status.dart';
 import 'extractors.dart';
+import 'location_type.dart';
 
 /// 解析结果
 class ParseResult {
@@ -17,6 +18,7 @@ class ParseResult {
   final ExtractionResult<String> trackingNumber;
   final ExtractionResult<String> phoneTail;
   final ExtractionResult<String> location;
+  final LocationType locationType;
   final ExtractionResult<PackageStatus> status;
   final List<String> warnings;
   final double overallConfidence;
@@ -27,6 +29,7 @@ class ParseResult {
     required this.trackingNumber,
     required this.phoneTail,
     required this.location,
+    this.locationType = LocationType.unknown,
     required this.status,
     this.warnings = const [],
     this.overallConfidence = 0.0,

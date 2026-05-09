@@ -132,6 +132,7 @@ class Package {
   final DateTime? archivedAt;
   final bool notifiedArrived;
   final List<StatusTransition> statusHistory;
+  final String? transitFingerprint;  // transit 阶段的弱身份标识
 
   const Package({
     required this.id,
@@ -147,6 +148,7 @@ class Package {
     this.archivedAt,
     this.notifiedArrived = false,
     this.statusHistory = const [],
+    this.transitFingerprint,
   });
 
   Package copyWith({
@@ -163,6 +165,7 @@ class Package {
     DateTime? archivedAt,
     bool? notifiedArrived,
     List<StatusTransition>? statusHistory,
+    String? transitFingerprint,
   }) {
     return Package(
       id: id ?? this.id,
@@ -178,6 +181,7 @@ class Package {
       archivedAt: archivedAt ?? this.archivedAt,
       notifiedArrived: notifiedArrived ?? this.notifiedArrived,
       statusHistory: statusHistory ?? this.statusHistory,
+      transitFingerprint: transitFingerprint ?? this.transitFingerprint,
     );
   }
 

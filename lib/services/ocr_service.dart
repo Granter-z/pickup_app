@@ -6,6 +6,7 @@
 library;
 
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
+import '../core/debug/debug_trace.dart';
 import '../core/ocr/ocr_result.dart';
 import '../core/ocr/ocr_service.dart' as core;
 
@@ -20,8 +21,11 @@ class OcrService {
 
     try {
       final recognized = await recognizer.processImage(inputImage);
-      return recognized.text;
-    } catch (_) {
+      final rawText = recognized.text;
+      DebugTrace.ocrResult(rawText);
+      return rawText;
+    } catch (e, stackTrace) {
+      DebugTrace.error('OCR识别异常', error: e, stackTrace: stackTrace);
       return '';
     } finally {
       await recognizer.close();

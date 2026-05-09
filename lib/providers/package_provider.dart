@@ -1,9 +1,11 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../main.dart';
+import '../core/debug/debug_trace.dart';
 import '../models/package_model.dart';
 import '../core/models/pending_confirmation.dart';
 import '../services/hero_decision_service.dart';
+import '../services/notification_service.dart';
 
 class PackageListNotifier extends StateNotifier<List<Package>> {
   final Box<HivePackage> _box = Hive.box<HivePackage>(kPackagesBox);
@@ -16,13 +18,30 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
   }
 
   void addPackage(Package package) {
-    // 检查是否已存在相同的快递（基于快递公司和运单号）
-    final existingIndex = state.indexWhere((p) => 
-        p.courier == package.courier && 
-        p.trackingNumber == package.trackingNumber &&
-        p.status.isPending);
+    // 分层身份标识：
+    // - arrived 阶段（强身份）：courier + pickupCode + location
+    // - transit 阶段（弱身份）：courier + transitFingerprint
+    
+    DebugTrace.separator('DEDUPE CHECK');
+    print('package.status: ${package.status.label}');
+    print('package.courier: ${package.courier.displayName}');
+    print('package.trackingNumber: ${package.trackingNumber}');
+    print('package.pickupCode: ${package.pickupCode}');
+    print('package.location: ${package.location}');
+    print('package.transitFingerprint: ${package.transitFingerprint}');
+    print('existing packages count: ${state.length}');
+    
+    final existingIndex = _findExistingPackage(package);
     
     if (existingIndex != -1) {
+      DebugTrace.dedupeResult(
+        method: package.status.isArrived ? 'arrived_strong' : 'transit_weak',
+        isDuplicate: true,
+        existingIndex: existingIndex,
+        existingId: state[existingIndex].id,
+        reason: 'Found existing package with matching identity',
+      );
+      
       // 已存在相同快递，整合信息
       final existing = state[existingIndex];
       final updated = existing.copyWith(
@@ -34,16 +53,93 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
         status: package.status.urgencyScore > existing.status.urgencyScore 
             ? package.status 
             : existing.status,
+        transitFingerprint: package.transitFingerprint ?? existing.transitFingerprint,
       );
       
       state = [
         for (int i = 0; i < state.length; i++)
           if (i == existingIndex) updated else state[i],
       ];
+      
+      // 如果状态变为 arrived 且未通知过，触发通知
+      if (updated.status.isArrived && !updated.notifiedArrived) {
+        _triggerArrivedNotification(updated);
+      }
     } else {
+      DebugTrace.dedupeResult(
+        method: package.status.isArrived ? 'arrived_strong' : 'transit_weak',
+        isDuplicate: false,
+        reason: 'No matching package found',
+      );
       state = [...state, package];
+      
+      // 如果是 arrived 状态且未通知过，触发通知
+      if (package.status.isArrived && !package.notifiedArrived) {
+        _triggerArrivedNotification(package);
+      }
     }
     _sync();
+  }
+  
+  /// 触发到件通知
+  void _triggerArrivedNotification(Package package) {
+    final notificationService = NotificationService();
+    
+    // 标记为已通知
+    final updatedPackage = package.copyWith(notifiedArrived: true);
+    state = [
+      for (final p in state)
+        if (p.id == package.id) updatedPackage else p,
+    ];
+    _sync();
+    
+    // 异步发送通知
+    notificationService.showArrivedNotification(package);
+    notificationService.scheduleReminderNotification(package);
+  }
+  
+  /// 查找已存在的相同包裹
+  int _findExistingPackage(Package package) {
+    // arrived 阶段：强身份匹配
+    if (package.status.isArrived) {
+      final index = state.indexWhere((p) => 
+          p.courier == package.courier && 
+          p.status.isPending &&
+          (
+            // 方式1：运单号匹配
+            (p.trackingNumber.isNotEmpty && p.trackingNumber == package.trackingNumber) ||
+            // 方式2：取件码 + 地点匹配
+            (p.pickupCode.isNotEmpty && p.pickupCode == package.pickupCode &&
+             p.location.isNotEmpty && p.location == package.location)
+          ));
+      print('_findExistingPackage (arrived): index=$index');
+      return index;
+    }
+    
+    // transit 阶段：弱身份匹配
+    if (package.status == PackageStatus.transit || package.status == PackageStatus.delivering) {
+      final fingerprint = package.transitFingerprint;
+      if (fingerprint != null && fingerprint.isNotEmpty) {
+        final index = state.indexWhere((p) => 
+            p.courier == package.courier && 
+            p.status.isPending &&
+            p.transitFingerprint == fingerprint);
+        print('_findExistingPackage (transit fingerprint): index=$index');
+        return index;
+      }
+      // 如果没有 fingerprint，退回到运单号匹配
+      if (package.trackingNumber.isNotEmpty) {
+        final index = state.indexWhere((p) => 
+            p.courier == package.courier && 
+            p.trackingNumber == package.trackingNumber &&
+            p.status.isPending);
+        print('_findExistingPackage (transit trackingNumber): index=$index');
+        return index;
+      }
+    }
+    
+    print('_findExistingPackage: no match method for status=${package.status.label}');
+    return -1;
   }
   
   UrgencyLevel _higherUrgency(UrgencyLevel a, UrgencyLevel b) {
@@ -51,6 +147,9 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
   }
 
   void markPickedUp(String id) {
+    // 取消该包裹的通知
+    NotificationService().cancelNotification(id);
+    
     state = [
       for (final p in state)
         if (p.id == id)
