@@ -2,8 +2,8 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../constants/app_constants.dart';
-import '../../../models/package_model.dart';
-import '../../../core/models/pending_confirmation.dart';
+import '../../../../platform/storage/hive_package.dart';
+import '../../../../core/models/pending_confirmation.dart';
 import '../../../providers/package_provider.dart';
 
 /// 待确认包裹区域

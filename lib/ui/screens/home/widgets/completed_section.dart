@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import '../../../constants/app_constants.dart';
-import '../../../models/package_model.dart';
+import '../../../../platform/storage/hive_package.dart';
 import '../../../providers/package_provider.dart';
 
 class CompletedSection extends ConsumerStatefulWidget {

@@ -1,17 +1,62 @@
-# pickup_app
+# Pickup App
 
-A new Flutter project.
+Flutter app for tracking package pickups. Chinese UI with iOS-style design.
 
-## Getting Started
+## Architecture
 
-This project is a starting point for a Flutter application.
+```
+ui/ ──────→ app/ ──────→ core/
+  │                         ▲
+  └────→ platform/ ────────┘
+```
 
-A few resources to get you started if this is your first Flutter project:
+| Layer | Role |
+|-------|------|
+| `core/` | Immutable pure logic (frozen) |
+| `app/` | Sole orchestration (pipeline) |
+| `platform/` | External adapters (OCR / Hive / Notification) |
+| `ui/` | Flutter rendering (providers / screens / theme) |
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+---
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## 🔴 HARD RULE: CORE IS IMMUTABLE
+
+```
+lib/core/ is FROZEN.
+Read it from anywhere. Change it only for pure business logic.
+```
+
+### core MUST NOT import:
+
+- ❌ `package:flutter/*`
+- ❌ `package:pickup_app/platform/*`
+- ❌ `package:pickup_app/app/*`
+- ❌ `package:pickup_app/ui/*`
+
+### core does NOT know about:
+
+- ❌ OCR implementation (ML Kit, etc.)
+- ❌ Notification system
+- ❌ UI state (Widget, BuildContext, Riverpod)
+- ❌ Storage mechanism (Hive, SQLite, etc.)
+
+### core ONLY contains:
+
+- ✅ `models/` — Package, PackageStatus, PendingConfirmation
+- ✅ `parser/` — TextParser, extractors, regex patterns
+- ✅ `ocr/` — OcrService interface, OcrResult, ImagePreprocessor
+- ✅ `engine/` — HeroCardEngine, HeroCardState
+- ✅ `sanitizer/` — TextSanitizer, noise filtering
+- ✅ `utils/` — TextNormalizer
+- ✅ `debug/` — DebugTrace, Metrics
+
+---
+
+## Quick Start
+
+```bash
+flutter pub get
+flutter run
+flutter test
+flutter analyze
+```

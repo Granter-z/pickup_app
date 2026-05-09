@@ -1,12 +1,12 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
-import '../main.dart';
-import '../core/debug/debug_trace.dart';
-import '../core/debug/metrics.dart';
-import '../models/package_model.dart';
-import '../core/models/pending_confirmation.dart';
-import '../services/hero_decision_service.dart';
-import '../services/notification_service.dart';
+import '../../main.dart';
+import '../../core/debug/debug_trace.dart';
+import '../../core/debug/metrics.dart';
+import '../../platform/storage/hive_package.dart';
+import '../../core/models/pending_confirmation.dart';
+import '../../app/hero_decision.dart';
+import '../../platform/notification/notification_adapter.dart';
 
 class PackageListNotifier extends StateNotifier<List<Package>> {
   Box<HivePackage>? _box;
@@ -132,7 +132,7 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
   
   /// 触发到件通知
   void _triggerArrivedNotification(Package package) {
-    final notificationService = NotificationService();
+    final notificationService = NotificationAdapter();
     
     // 标记为已通知
     final updatedPackage = package.copyWith(notifiedArrived: true);
@@ -154,8 +154,8 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
 
   /// 查找已存在的相同包裹
   ///
-  /// Tracking-first identity system：
-  ///   Priority 1: trackingNumber（最高优先级，不依赖 courier）
+  /// Enhanced identity system（2026-05-10 fix）：
+  ///   Priority 1: trackingNumber + pickupCode（联合身份，防止同运单不同取件码被覆盖）
   ///   Priority 2: pickupCode + location（取件身份）
   ///   Priority 3: transitFingerprint（弱匹配 fallback）
   int _findExistingPackage(Package package) {
@@ -169,11 +169,28 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
           'code=${p.pickupCode} status=${p.status.label}');
     }
 
-    // ── Priority 1: trackingNumber ────────────────────────────
+    // ── Priority 1: trackingNumber + pickupCode（联合判断）────
     final incomingTracking = _normalizeTracking(package.trackingNumber);
-    if (incomingTracking.isNotEmpty) {
+    if (incomingTracking.isNotEmpty && package.pickupCode.isNotEmpty) {
       print('Priority 1: trackingNumber="${package.trackingNumber}" '
-          '→ normalized="$incomingTracking"');
+          '→ normalized="$incomingTracking" '
+          'pickupCode=${package.pickupCode}');
+      final index = state.indexWhere((p) {
+        final existingTracking = _normalizeTracking(p.trackingNumber);
+        return existingTracking.isNotEmpty &&
+               existingTracking == incomingTracking &&
+               p.pickupCode == package.pickupCode;
+      });
+
+      if (index != -1) {
+        Metrics.inc('dedupe.hit');
+        print('→ HIT: index=$index id=${state[index].id} (tracking+code match)');
+        return index;
+      }
+      print('→ miss (no entry matches both tracking AND code)');
+    } else if (incomingTracking.isNotEmpty) {
+      // 运单号有值但取件码为空时，降级为仅运单号匹配（兼容旧数据）
+      print('Priority 1 (fallback): trackingNumber only (no pickupCode)');
       final index = state.indexWhere((p) {
         final existing = _normalizeTracking(p.trackingNumber);
         return existing.isNotEmpty && existing == incomingTracking;
@@ -181,10 +198,10 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
 
       if (index != -1) {
         Metrics.inc('dedupe.hit');
-        print('→ HIT: index=$index id=${state[index].id}');
+        print('→ HIT: index=$index id=${state[index].id} (tracking-only match)');
         return index;
       }
-      print('→ miss (no state entry matches)');
+      print('→ miss');
     }
 
     // ── Priority 2: pickupCode + location ─────────────────────
@@ -247,7 +264,7 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
 
   void markPickedUp(String id) {
     // 取消该包裹的通知
-    NotificationService().cancelNotification(id);
+    NotificationAdapter().cancelNotification(id);
     
     state = [
       for (final p in state)
@@ -341,7 +358,7 @@ final groupedPendingPackagesProvider = Provider<Map<String, List<Package>>>((ref
   return grouped;
 });
 
-final heroDecisionProvider = Provider<HeroCardDecision>((ref) {
+final heroDecisionProvider = Provider<HeroDecision>((ref) {
   final packages = ref.watch(packageListProvider);
   return HeroDecisionService.decide(packages);
 });

@@ -8,7 +8,7 @@ library;
 
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
-import '../core/models/package_status.dart';
+import '../../core/models/package_status.dart';
 
 /// 状态视觉属性扩展
 extension PackageStatusUI on PackageStatus {

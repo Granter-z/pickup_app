@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../constants/app_constants.dart';
 import '../../../providers/package_provider.dart';
-import '../../../services/hero_decision_service.dart';
+import '../../../../app/hero_decision.dart';
 
 class HeroCard extends ConsumerWidget {
   const HeroCard({super.key});

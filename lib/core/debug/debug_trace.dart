@@ -12,7 +12,7 @@ enum DebugLevel { compact, verbose }
 
 class DebugTrace {
   static bool enabled = true;
-  static DebugLevel level = DebugLevel.compact;
+  static DebugLevel level = DebugLevel.verbose;
 
   // ── 基础工具 ─────────────────────────────────────────────
 

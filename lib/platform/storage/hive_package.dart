@@ -6,12 +6,12 @@
 /// 3. 保持向后兼容
 library;
 
-import '../core/models/package.dart';
-import '../core/models/package_status.dart';
+import '../../core/models/package.dart';
+import '../../core/models/package_status.dart';
 
 // 重新导出核心模型，保持API兼容
-export '../core/models/package.dart';
-export '../core/models/package_status.dart';
+export '../../core/models/package.dart';
+export '../../core/models/package_status.dart';
 
 /// Hive持久化的Package模型
 /// 

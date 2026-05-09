@@ -55,9 +55,10 @@ class TextPreprocessor {
       cleaned = cleaned.replaceAll(entry.key, entry.value);
     }
     
-    // 去除中文字符之间的空格（OCR常见artifact）
+    // 去除中文字符间的空格（OCR常见artifact）
+    // 注意：只去除空格和制表符，保留换行符以维持文本结构
     cleaned = cleaned.replaceAllMapped(
-      RegexPatterns.chineseSpace,
+      RegExp(r'([一-鿿])[ \t]+([一-鿿])'),
       (m) => '${m[1]}${m[2]}',
     );
     

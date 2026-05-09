@@ -1,7 +1,7 @@
 import 'package:hive/hive.dart';
-import '../core/models/package_status.dart';
-import '../core/models/package.dart';
-import '../models/package_model.dart';
+import '../../core/models/package_status.dart';
+import '../../core/models/package.dart';
+import 'hive_package.dart';
 
 // ── PackageStatus ──────────────────────────────────────────────
 

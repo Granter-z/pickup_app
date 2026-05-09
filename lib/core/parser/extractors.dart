@@ -194,11 +194,13 @@ class PickupCodeExtractor {
 
 /// 取货地点提取器
 class LocationExtractor {
-  /// 物流节点关键词（不是取件地点）
+  /// 物流节点关键词（不是取件地点）- 需要过滤掉
   static const List<String> _logisticsNodeKeywords = [
     '转运中心', '分拨中心', '集运仓', '物流园', '运输中心',
     '分拣中心', '中转站', '配送中心',
     '集散中心', '处理中心', '航空港',
+    '集货点', '漯河集货点', '廊坊临空转运中心',
+    '深圳转运中心', '南昌转运', '邮城网点',
   ];
 
   /// 取件站点关键词
@@ -206,6 +208,7 @@ class LocationExtractor {
     '菜鸟驿站', '菜鸟', '代收点', '丰巢', '快递柜',
     '妈妈驿站', '驿站', '营业部', '网点', '自提点',
     '服务点', '门店', '北门店', '南门店', '东门店', '西门店',
+    '大院驿站',
   ];
 
   /// 检查是否为物流节点（不是取件地点）
@@ -230,18 +233,56 @@ class LocationExtractor {
   }
 
   static LocationParseResult extractTyped(String text) {
+    // Priority 0: 收货地址格式 (最高优先级)
+    final shippingAddrMatch = RegExp(
+      r'(?:收货地址|发货地址|地址)[：:\s]*([\u4e00-\u9fa5]{2,50})',
+    ).firstMatch(text);
+    if (shippingAddrMatch != null) {
+      var loc = shippingAddrMatch.group(1) ?? '';
+      loc = loc.replaceAll(RegExp(r'[展开查看更多>]+$'), '').trim();
+      if (loc.length >= 4 && !_isLogisticsNode(loc)) {
+        return LocationParseResult(
+          value: loc,
+          type: LocationType.pickupStation,
+          confidence: 0.92,
+          source: 'shipping_address',
+        );
+      }
+    }
+
+    // Priority 0.5: "收 xxx" 格式（极兔等快递使用）
+    // 匹配独立行的 "收 地址内容"
+    final receiveMatch = RegExp(r'\n\s*收\s+([\u4e00-\u9fa5][\u4e00-\u9fa5\d\-]{4,40})')
+        .firstMatch(text);
+    if (receiveMatch != null) {
+      var loc = receiveMatch.group(1) ?? '';
+      if (loc.length >= 6 && !_isLogisticsNode(loc)) {
+        return LocationParseResult(
+          value: loc,
+          type: LocationType.pickupStation,
+          confidence: 0.88,
+          source: 'receive_format',
+        );
+      }
+    }
+
     // Priority 1: 地点标题格式1
     final title1Match = RegexPatterns.locationTitle1.firstMatch(text);
     if (title1Match != null) {
       var loc = TextPreprocessor.cleanLocation(title1Match.group(1)!.trim());
       if (loc.length >= 6 && !TextPreprocessor.isAdText(loc)) {
         final type = _determineLocationType(loc);
-        return LocationParseResult(
-          value: loc,
-          type: type,
-          confidence: type == LocationType.pickupStation ? 0.9 : 0.3,
-          source: 'title_pattern_1',
-        );
+        // 如果是物流节点，不返回，继续尝试下一优先级
+        if (type == LocationType.transitCenter) {
+          // 跳过，继续尝试
+        } else {
+          return LocationParseResult(
+            value: loc,
+            type: type,
+            confidence: type == LocationType.pickupStation ? 0.9 : 0.3,
+            source: 'title_pattern_1',
+          );
+        }
       }
     }
 
@@ -251,12 +292,16 @@ class LocationExtractor {
       var loc = TextPreprocessor.cleanLocation(title2Match.group(1)!.trim());
       if (loc.length >= 6 && !TextPreprocessor.isAdText(loc)) {
         final type = _determineLocationType(loc);
-        return LocationParseResult(
-          value: loc,
-          type: type,
-          confidence: type == LocationType.pickupStation ? 0.85 : 0.3,
-          source: 'title_pattern_2',
-        );
+        if (type == LocationType.transitCenter) {
+          // 跳过，继续尝试
+        } else {
+          return LocationParseResult(
+            value: loc,
+            type: type,
+            confidence: type == LocationType.pickupStation ? 0.85 : 0.3,
+            source: 'title_pattern_2',
+          );
+        }
       }
     }
 
@@ -268,12 +313,16 @@ class LocationExtractor {
       loc = TextPreprocessor.cleanLocation(loc);
       if (loc.length >= 3 && !TextPreprocessor.isAdText(loc)) {
         final type = _determineLocationType(loc);
-        return LocationParseResult(
-          value: loc,
-          type: type,
-          confidence: type == LocationType.pickupStation ? 0.8 : 0.3,
-          source: 'arrival_format',
-        );
+        if (type == LocationType.transitCenter) {
+          // 跳过，继续尝试
+        } else {
+          return LocationParseResult(
+            value: loc,
+            type: type,
+            confidence: type == LocationType.pickupStation ? 0.8 : 0.3,
+            source: 'arrival_format',
+          );
+        }
       }
     }
 
@@ -290,7 +339,8 @@ class LocationExtractor {
 
         if (candidate.length > bestLength && 
             candidate.length >= 4 && 
-            !TextPreprocessor.isAdText(candidate)) {
+            !TextPreprocessor.isAdText(candidate) &&
+            !_isLogisticsNode(candidate)) {
           bestLocation = candidate;
           bestLength = candidate.length;
         }
@@ -333,27 +383,34 @@ class TrackingNumberExtractor {
       );
     }
 
-    // Priority 2: 快递公司+运单号
+    // Priority 2: 快递公司+运单号（保留前缀）
     final courierMatch = RegexPatterns.courierTrackingNumber.firstMatch(text);
     if (courierMatch != null) {
+      // 使用 group(0) 获取完整匹配（包含快递公司名和前缀字母）
+      var fullMatch = courierMatch.group(0) ?? '';
+      // 清理可能的空白字符
+      fullMatch = fullMatch.replaceAll(RegExp(r'\s+'), '');
+      // 提取纯运单号部分（去掉公司名）
+      final pureNumber = courierMatch.group(1) ?? fullMatch;
       return ExtractionResult(
-        value: courierMatch.group(1)!,
+        value: pureNumber.isNotEmpty ? pureNumber : fullMatch,
         confidence: 0.9,
         source: 'courier_tracking',
       );
     }
 
-    // Priority 3: 快递公司前缀
-    final patterns = [
+    // Priority 3: 快递公司前缀（JT, YT, SF, ZTO等）
+    final prefixPatterns = [
+      RegexPatterns.jtTracking,
       RegexPatterns.sfTracking,
       RegexPatterns.jdTracking,
-      RegexPatterns.ztoTracking,
-      RegexPatterns.ytTracking,
       RegexPatterns.yt88Tracking,
+      RegexPatterns.ytTracking,
+      RegexPatterns.ztoTracking,
       RegexPatterns.numericTracking,
     ];
 
-    for (final pattern in patterns) {
+    for (final pattern in prefixPatterns) {
       final match = pattern.firstMatch(text);
       if (match != null) {
         // 使用 group(0) 获取完整匹配（包含前缀）
@@ -361,7 +418,7 @@ class TrackingNumberExtractor {
         if (!RegexPatterns.phoneNumber.hasMatch(number)) {
           return ExtractionResult(
             value: number,
-            confidence: 0.8,
+            confidence: 0.85,
             source: 'courier_prefix',
           );
         }
@@ -369,8 +426,6 @@ class TrackingNumberExtractor {
     }
 
     // Priority 4: 宽松长数字兜底（10-18位）
-    // OCR 常见问题：单号被识别成长数字串
-    // 置信度较低，需要 courier 已识别才可信
     final looseMatch = RegexPatterns.looseNumericTracking.firstMatch(text);
     if (looseMatch != null) {
       final number = looseMatch.group(1)!;

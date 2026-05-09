@@ -86,10 +86,13 @@ class RegexPatterns {
     r'(?:快递单号|运单号|物流单号|包裹编号|单号)[：:\s]*([A-Za-z0-9]{10,25})',
   );
   
-  /// 快递公司+运单号
+  /// 快递公司+运单号（保留完整格式含前缀）
   static final courierTrackingNumber = RegExp(
-    r'(?:中通速递|圆通速递|申通快递|韵达快递|极兔速递|顺丰速运)[^0-9]{0,10}([A-Za-z0-9]{10,20})',
+    r'((?:中通速递|圆通速递|申通快递|韵达快递|极兔速递|顺丰速运)\s*(?:[A-Za-z]{2})?\d{8,25})',
   );
+
+  /// 极兔运单号 (JT开头)
+  static final jtTracking = RegExp(r'\b(JT\d{12,18})\b');
   
   /// 顺丰运单号
   static final sfTracking = RegExp(r'\b(SF\d{8,20})\b');

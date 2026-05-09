@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../constants/app_constants.dart';
 import '../../../providers/package_provider.dart';
-import '../../../services/package_ocr_service.dart';
+import '../../../../app/ocr_pipeline.dart';
 
 class UploadButton extends ConsumerStatefulWidget {
   const UploadButton({super.key});
@@ -30,7 +30,7 @@ class _UploadButtonState extends ConsumerState<UploadButton> {
 
     try {
       // 使用新的解析方法，区分高/低置信度
-      final result = await PackageOcrService.parseToConfirmations(image.path);
+      final result = await OcrPipeline.run(image.path);
 
       if (result.isEmpty) {
         if (mounted) _showError('未识别到快递信息，请重试');

@@ -157,22 +157,37 @@ class TextParser {
 
   /// 查找文本中的包裹边界
   static List<int> _findBoundaries(String text) {
-    final positions = <int>[];
+    final positions = <_BoundaryInfo>[];
 
-    // 取件码/取货码
+    // 取件码/取货码（带标签）
     for (final m in RegexPatterns.labeledPickupCode.allMatches(text)) {
-      positions.add(m.start);
+      final code = m.group(1) ?? '';
+      positions.add(_BoundaryInfo(m.start, code, 'labeled'));
     }
 
-    // 裸bay码
+    // 裸bay码 (N-N-NNNN)
     for (final m in RegexPatterns.bayFormatCode.allMatches(text)) {
-      if (!positions.any((p) => (p - m.start).abs() < 5)) {
-        positions.add(m.start);
+      final code = m.group(0) ?? '';
+      final isDuplicate = positions.any((p) =>
+        p.code == code && (p.position - m.start).abs() < 50);
+      if (!isDuplicate) {
+        positions.add(_BoundaryInfo(m.start, code, 'bay'));
       }
     }
 
-    positions.sort();
-    return positions;
+    // "取件出单号后五位" 格式（如：06389）
+    final tailCodePattern = RegExp(r'(?:取件出单号|单号)[后之]?[尾末五]位[：:\s]*(\d{4,6})');
+    for (final m in tailCodePattern.allMatches(text)) {
+      final code = m.group(1) ?? '';
+      final isDuplicate = positions.any((p) =>
+        p.code == code && (p.position - m.start).abs() < 50);
+      if (!isDuplicate) {
+        positions.add(_BoundaryInfo(m.start, code, 'tail_code'));
+      }
+    }
+
+    positions.sort((a, b) => a.position.compareTo(b.position));
+    return positions.map((p) => p.position).toList();
   }
 
   /// 向后兼容的解析方法
@@ -184,4 +199,13 @@ class TextParser {
   static List<ParsedPackage> parseMultiLegacy(String text) {
     return parseMulti(text).map((r) => r.toParsedPackage()).toList();
   }
+}
+
+/// 边界信息（用于去重）
+class _BoundaryInfo {
+  final int position;
+  final String code;
+  final String type;
+  
+  _BoundaryInfo(this.position, this.code, this.type);
 }

@@ -1,76 +1,58 @@
+library;
+
 import 'package:uuid/uuid.dart';
-import '../core/debug/debug_trace.dart';
-import '../core/debug/metrics.dart';
 import '../core/models/package.dart';
-import '../core/parser/conflict_detector.dart';
-import '../core/parser/parse_result.dart';
+import '../core/models/package_status.dart';
+import '../core/models/pending_confirmation.dart';
 import '../core/parser/text_parser.dart' as core;
+import '../core/parser/conflict_detector.dart';
 import '../core/sanitizer/text_sanitizer.dart';
 import '../core/utils/text_normalizer.dart';
-import '../models/package_model.dart';
-import '../core/models/pending_confirmation.dart';
-import 'ocr_service.dart';
-import 'text_parser.dart';
+import '../core/debug/debug_trace.dart';
+import '../core/debug/metrics.dart';
+import '../platform/ocr/mlkit_ocr_adapter.dart';
 
-class PackageOcrService {
+class OcrPipeline {
   static const _uuid = Uuid();
+  static final _ocr = MlKitOcrAdapter();
 
-  static Future<List<ParsedPackage>> processImage(String imagePath) async {
-    final rawText = await OcrService.recognizeFromImage(imagePath);
-
-    if (rawText.isEmpty) return [];
-
-    return TextParser.parseMulti(rawText);
-  }
-
-  static Future<List<Package>> parseToPackages(
-    String imagePath, {
-    UrgencyLevel defaultUrgency = UrgencyLevel.normal,
-  }) async {
-    final parsedList = await processImage(imagePath);
-
-    return parsedList.map((parsed) => Package(
-      id: _uuid.v4(),
-      trackingNumber: parsed.trackingNumber.isNotEmpty
-          ? parsed.trackingNumber
-          : 'OCR-${DateTime.now().millisecondsSinceEpoch}',
-      courier: parsed.courier,
-      pickupCode: parsed.pickupCode,
-      location: parsed.location,
-      description: _buildDescription(parsed),
-      urgency: defaultUrgency,
-      status: parsed.status,
-      addedAt: DateTime.now(),
-    )).toList();
-  }
-
-  /// 解析为待确认包裹（带置信度）
-  static Future<OcrParseResult> parseToConfirmations(String imagePath) async {
-    final rawText = await OcrService.recognizeFromImage(imagePath);
+  static Future<OcrParseResult> run(String imagePath) async {
+    final rawText = await _ocr.recognizeFromImage(imagePath);
+    final ocrText = rawText.rawText;
 
     Metrics.inc('ocr.attempt');
 
-    if (rawText.isEmpty) {
+    if (ocrText.isEmpty) {
       Metrics.inc('abort.empty');
       DebugTrace.abort('rawText empty');
       return OcrParseResult.empty();
     }
 
-    // 文本清理
     DebugTrace.separator('TEXT SANITIZATION');
-    final sanitizedResult = TextSanitizer.cleanWithAnalysis(rawText);
-    print('original length: ${rawText.length}');
-    print('cleaned length: ${sanitizedResult.cleaned.length}');
-    print('keptLines: ${sanitizedResult.keptLines}');
-    print('removedLines: ${sanitizedResult.removedLines}');
+
+    print('===============================================');
+    print('  [LAYER 1] OCR RAW TEXT');
+    print('===============================================');
+    print(ocrText);
+    print('  length: ${ocrText.length}');
+    print('');
+
+    final sanitizedResult = TextSanitizer.cleanWithAnalysis(ocrText);
+    print('===============================================');
+    print('  [LAYER 2] SANITIZED TEXT');
+    print('===============================================');
+    print(sanitizedResult.cleaned);
+    print('  original length: ${ocrText.length}');
+    print('  cleaned length: ${sanitizedResult.cleaned.length}');
+    print('  keptLines: ${sanitizedResult.keptLines}');
+    print('  removedLines: ${sanitizedResult.removedLines}');
     if (sanitizedResult.noiseLines.isNotEmpty) {
-      print('noiseLines: ${sanitizedResult.noiseLines.map((a) => a.text).take(3).toList()}...');
+      print('  noiseLines: ${sanitizedResult.noiseLines.map((a) => a.text).take(5).toList()}...');
     }
-    
-    // 使用清理后的文本
+    print('');
+
     final sanitizedText = sanitizedResult.cleaned;
 
-    // 冲突检测（基于清理后的文本）
     final conflictResult = ConflictDetector.analyze(sanitizedText);
     DebugTrace.separator('CONFLICT ANALYSIS');
     print('hasTransitSignals: ${conflictResult.hasTransitSignals}');
@@ -83,22 +65,24 @@ class PackageOcrService {
       print('arrivalKeywords: ${conflictResult.detectedArrivalKeywords}');
     }
 
-    // ── 轻量熔断：Dashboard / 首页截图 ─────────────────────
     if (TextSanitizer.shouldAbortParse(sanitizedText)) {
       Metrics.inc('abort.dashboard');
       DebugTrace.abort('dashboard_like_screen');
       return OcrParseResult.empty();
     }
 
-    // 使用核心 Parser 解析（基于清理后的文本）
     DebugTrace.separator('PARSING START');
     print('sanitizedText length: ${sanitizedText.length}');
 
-    final coreParser = _getCoreParser();
-    final parseResults = coreParser.parseMulti(sanitizedText);
-    
+    final parseResults = core.TextParser.parseMulti(sanitizedText);
+
     DebugTrace.separator('PARSING COMPLETE');
     print('parseResults count: ${parseResults.length}');
+
+    print('');
+    print('===============================================');
+    print('  [LAYER 3] PARSE RESULTS');
+    print('===============================================');
 
     final highConfidence = <Package>[];
     final lowConfidence = <PendingConfirmation>[];
@@ -110,53 +94,51 @@ class PackageOcrService {
         final id = _uuid.v4();
 
         DebugTrace.parseResult(result, index: i);
-        
-        // 打印规范化文本和指纹
+
         final courierName = result.courier.value.toString().split('.').last;
-        final normalized = TextNormalizer.normalize(rawText);
+        print('');
+        print('  +-----------------------------------------');
+        print('  | $i');
+        print('  +-----------------------------------------');
+        print('  | courier:       $courierName (conf: ${result.courier.confidence})');
+        print('  | pickupCode:    "${result.pickupCode.value}" (conf: ${result.pickupCode.confidence})');
+        print('  | trackingNumber: "${result.trackingNumber.value}" (conf: ${result.trackingNumber.confidence})');
+        print('  | location:      "${result.location.value}" (conf: ${result.location.confidence})');
+        print('  | status:        ${result.status.value} (conf: ${result.status.confidence})');
+        print('  | overallConf:   ${confidence.toStringAsFixed(2)}');
+        print('  | isValid:       ${result.isValid}');
+        print('  +-----------------------------------------');
+
+        final normalized = TextNormalizer.normalize(ocrText);
         final fingerprint = TextNormalizer.transitFingerprint(
-          courierName, rawText,
+          courierName, ocrText,
           trackingNumber: result.trackingNumber.value,
         );
-        DebugTrace.normalizedText(rawText, normalized, fingerprint ?? '(null)');
+        print('  | normalized:    "$normalized"');
+        print('  | fingerprint:   "$fingerprint"');
+        DebugTrace.normalizedText(ocrText, normalized, fingerprint ?? '(null)');
 
-        // 判断是否应该自动入库
-        // 优化策略：
-        // 1. transit && 无取件码 → 静默创建（用户不需要操作）
-        // 2. arrived && (无取件码 || 无地点) → 触发确认
-        // 3. 高冲突 → 触发确认
-        // 4. 低置信度 → 触发确认
-        
-        final isTransit = result.status.value == PackageStatus.transit || 
+        final isTransit = result.status.value == PackageStatus.transit ||
             result.status.value == PackageStatus.delivering;
         final isArrived = result.status.value == PackageStatus.arrived;
         final hasPickupCode = result.pickupCode.value.isNotEmpty;
         final hasLocation = result.location.value.isNotEmpty;
-        
-        // transit 且无取件码 → 静默创建
+
         if (isTransit && !hasPickupCode && confidence >= 0.5) {
-          DebugTrace.separator('TRANSIT + NO PICKUP CODE → SILENT PACKAGE');
-          highConfidence.add(_parseResultToPackage(result, id, rawText));
-        }
-        // arrived 且信息不完整 → 触发确认
-        else if (isArrived && (!hasPickupCode || !hasLocation)) {
-          DebugTrace.separator('ARRIVED + INCOMPLETE INFO → PENDING CONFIRMATION');
-          lowConfidence.add(_parseResultToConfirmation(result, id, rawText));
-        }
-        // 高冲突 → 触发确认
-        else if (conflictResult.isHighConflict) {
-          DebugTrace.separator('HIGH CONFLICT → PENDING CONFIRMATION');
-          lowConfidence.add(_parseResultToConfirmation(result, id, rawText));
-        }
-        // 高置信度且无冲突 → 自动入库
-        else if (confidence >= 0.7) {
-          DebugTrace.separator('HIGH CONFIDENCE → PACKAGE');
-          highConfidence.add(_parseResultToPackage(result, id, rawText));
-        }
-        // 其他情况 → 触发确认
-        else {
-          DebugTrace.separator('LOW CONFIDENCE → PENDING CONFIRMATION');
-          lowConfidence.add(_parseResultToConfirmation(result, id, rawText));
+          DebugTrace.separator('TRANSIT + NO PICKUP CODE -> SILENT PACKAGE');
+          highConfidence.add(_toPackage(result, id, ocrText));
+        } else if (isArrived && (!hasPickupCode || !hasLocation)) {
+          DebugTrace.separator('ARRIVED + INCOMPLETE INFO -> PENDING CONFIRMATION');
+          lowConfidence.add(_toConfirmation(result, id, ocrText));
+        } else if (conflictResult.isHighConflict) {
+          DebugTrace.separator('HIGH CONFLICT -> PENDING CONFIRMATION');
+          lowConfidence.add(_toConfirmation(result, id, ocrText));
+        } else if (confidence >= 0.7) {
+          DebugTrace.separator('HIGH CONFIDENCE -> PACKAGE');
+          highConfidence.add(_toPackage(result, id, ocrText));
+        } else {
+          DebugTrace.separator('LOW CONFIDENCE -> PENDING CONFIRMATION');
+          lowConfidence.add(_toConfirmation(result, id, ocrText));
         }
       } catch (e, stackTrace) {
         DebugTrace.error('Error processing parseResult #$i', error: e, stackTrace: stackTrace);
@@ -172,18 +154,17 @@ class PackageOcrService {
     return OcrParseResult(
       highConfidencePackages: highConfidence,
       lowConfidenceConfirmations: lowConfidence,
-      rawText: rawText,
+      rawText: ocrText,
     );
   }
 
-  static Package _parseResultToPackage(dynamic result, String id, String rawText) {
-    // 生成 transit fingerprint
+  static Package _toPackage(dynamic result, String id, String rawText) {
     final courierName = result.courier.value.toString().split('.').last;
     final fingerprint = TextNormalizer.transitFingerprint(
       courierName, rawText,
       trackingNumber: result.trackingNumber.value,
     );
-    
+
     DebugTrace.packageCreated(Package(
       id: id,
       trackingNumber: result.trackingNumber.value,
@@ -195,7 +176,7 @@ class PackageOcrService {
       addedAt: DateTime.now(),
       transitFingerprint: fingerprint,
     ));
-    
+
     return Package(
       id: id,
       trackingNumber: result.trackingNumber.value.isNotEmpty
@@ -204,7 +185,7 @@ class PackageOcrService {
       courier: result.courier.value,
       pickupCode: result.pickupCode.value,
       location: result.location.value,
-      description: _buildDescriptionFromResult(result),
+      description: _buildDescription(result),
       urgency: UrgencyLevel.normal,
       status: result.status.value,
       addedAt: DateTime.now(),
@@ -212,7 +193,7 @@ class PackageOcrService {
     );
   }
 
-  static PendingConfirmation _parseResultToConfirmation(
+  static PendingConfirmation _toConfirmation(
     dynamic result,
     String id,
     String rawText,
@@ -225,7 +206,7 @@ class PackageOcrService {
       location: result.location.value,
       status: result.status.value,
     );
-    
+
     return PendingConfirmation(
       id: id,
       courier: result.courier.value,
@@ -247,38 +228,18 @@ class PackageOcrService {
     );
   }
 
-  static String _buildDescriptionFromResult(dynamic result) {
+  static String _buildDescription(dynamic result) {
     final parts = <String>[];
     if (result.pickupCode.value.isNotEmpty) {
-      parts.add('取件码 ${result.pickupCode.value}');
+      parts.add('${result.pickupCode.value}');
     }
     if (result.location.value.isNotEmpty) {
       parts.add(result.location.value);
     }
-    return parts.isNotEmpty ? parts.join(' · ') : 'OCR识别';
-  }
-
-  static dynamic _getCoreParser() {
-    // 导入核心 Parser
-    return _CoreParserAdapter();
-  }
-
-  static String _buildDescription(ParsedPackage parsed) {
-    final parts = <String>[];
-
-    if (parsed.phoneLast4.isNotEmpty) {
-      parts.add('手机尾号 ${parsed.phoneLast4}');
-    }
-
-    if (parsed.pickupCode.isNotEmpty) {
-      parts.add('取件码 ${parsed.pickupCode}');
-    }
-
-    return parts.isNotEmpty ? parts.join(' | ') : 'OCR识别导入';
+    return parts.isNotEmpty ? parts.join(' · ') : 'OCR';
   }
 }
 
-/// OCR 解析结果
 class OcrParseResult {
   final List<Package> highConfidencePackages;
   final List<PendingConfirmation> lowConfidenceConfirmations;
@@ -297,12 +258,4 @@ class OcrParseResult {
 
   int get totalCount =>
       highConfidencePackages.length + lowConfidenceConfirmations.length;
-}
-
-/// 核心 Parser 适配器
-class _CoreParserAdapter {
-  List<ParseResult> parseMulti(String text) {
-    // 使用核心层 TextParser
-    return core.TextParser.parseMulti(text);
-  }
 }
