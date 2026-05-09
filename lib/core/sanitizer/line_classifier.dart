@@ -61,7 +61,7 @@ class LineClassifier {
   /// 分析单行文本
   static LineAnalysis analyze(String line) {
     final trimmed = line.trim();
-    
+
     // 空行
     if (trimmed.isEmpty) {
       return LineAnalysis(text: line, type: LineType.noise, confidence: 1.0, reason: 'empty');
@@ -72,10 +72,8 @@ class LineClassifier {
       return LineAnalysis(text: line, type: LineType.noise, confidence: 0.8, reason: 'too_short');
     }
 
-    // 检查是否为噪音
-    if (_isNoiseLine(trimmed)) {
-      return LineAnalysis(text: line, type: LineType.noise, confidence: 0.9, reason: 'noise_keywords');
-    }
+    // 物流信息优先于噪音判断
+    // 原因：物流行可能同时包含噪音词（如"订单编号"附近的快递公司名）
 
     // 检查是否为取件码行
     if (_isPickupCodeLine(trimmed)) {
@@ -87,7 +85,7 @@ class LineClassifier {
       return LineAnalysis(text: line, type: LineType.pickupLocation, confidence: 0.8, reason: 'pickup_location');
     }
 
-    // 检查是否为物流信息行
+    // 检查是否为物流信息行（快递公司名、运输状态等）
     if (_isLogisticsLine(trimmed)) {
       return LineAnalysis(text: line, type: LineType.logistics, confidence: 0.8, reason: 'logistics_keywords');
     }
@@ -100,6 +98,11 @@ class LineClassifier {
     // 检查是否为联系信息行
     if (_isContactLine(trimmed)) {
       return LineAnalysis(text: line, type: LineType.contact, confidence: 0.7, reason: 'contact_pattern');
+    }
+
+    // 物流行都没命中，才检查噪音
+    if (_isNoiseLine(trimmed)) {
+      return LineAnalysis(text: line, type: LineType.noise, confidence: 0.9, reason: 'noise_keywords');
     }
 
     // 未知行

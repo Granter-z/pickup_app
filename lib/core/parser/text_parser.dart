@@ -59,8 +59,24 @@ class TextParser {
         : keywordCourier;
     
     final pickupCode = PickupCodeExtractor.extract(raw);
-    final trackingNumber = TrackingNumberExtractor.extract(raw);
+    var trackingNumber = TrackingNumberExtractor.extract(raw);
     final phoneTail = PhoneTailExtractor.extract(raw);
+
+    // 兜底：courier 已识别但单号为空 → 用宽松长数字匹配
+    // OCR 场景：单号常被识别为无标签的长数字串
+    if (trackingNumber.value.isEmpty && courier.confidence > 0) {
+      final looseMatch = RegexPatterns.looseNumericTracking.firstMatch(raw);
+      if (looseMatch != null) {
+        final number = looseMatch.group(1)!;
+        if (!RegexPatterns.phoneNumber.hasMatch(number)) {
+          trackingNumber = ExtractionResult(
+            value: number,
+            confidence: 0.6,
+            source: 'courier_guarded_loose',
+          );
+        }
+      }
+    }
     final locationResult = LocationExtractor.extractTyped(raw);
     final location = ExtractionResult(
       value: locationResult.value,

@@ -108,6 +108,9 @@ class RegexPatterns {
   
   /// 纯数字运单号
   static final numericTracking = RegExp(r'\b(\d{14,22})\b');
+
+  /// 宽松纯数字运单号（兜底：10-18位）
+  static final looseNumericTracking = RegExp(r'\b(\d{10,18})\b');
   
   /// 手机号（用于排除）
   static final phoneNumber = RegExp(r'^1[3-9]\d{9}$');

@@ -364,6 +364,21 @@ class TrackingNumberExtractor {
       }
     }
 
+    // Priority 4: 宽松长数字兜底（10-18位）
+    // OCR 常见问题：单号被识别成长数字串
+    // 置信度较低，需要 courier 已识别才可信
+    final looseMatch = RegexPatterns.looseNumericTracking.firstMatch(text);
+    if (looseMatch != null) {
+      final number = looseMatch.group(1)!;
+      if (!RegexPatterns.phoneNumber.hasMatch(number)) {
+        return ExtractionResult(
+          value: number,
+          confidence: 0.5,
+          source: 'loose_numeric',
+        );
+      }
+    }
+
     return ExtractionResult(
       value: '',
       confidence: 0.0,
