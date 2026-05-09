@@ -1,9 +1,9 @@
-#📦 取件应用
+# 📦 Pickup App
 
-> 基于截图的包裹取件事件管理器，使用 Flutter 构建。
+> Screenshot-based package pickup event manager built with Flutter.
 
-取件应用不是物流追踪器。
-它是一个 **基于 OCR 的事件理解系统**，专注于一个问题：
+Pickup App is not a logistics tracker.
+It is an **OCR-powered event understanding system** focused on one question:
 
 > **“Do I need to pick up a package right now?”**
 
@@ -300,7 +300,7 @@ flutter pub get
 flutter run
 ```
 
----"
+---
 
 # 📄 License
 
