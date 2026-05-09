@@ -3,8 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../../constants/app_constants.dart';
-import '../../../models/package_model.dart';
-import '../../../models/status_extension.dart';
 import '../../../providers/package_provider.dart';
 import '../../../services/package_ocr_service.dart';
 
@@ -31,23 +29,31 @@ class _UploadButtonState extends ConsumerState<UploadButton> {
     setState(() => _loading = true);
 
     try {
-      final packages = await PackageOcrService.parseToPackages(
-        image.path,
-        defaultUrgency: UrgencyLevel.warning,
-      );
+      // 使用新的解析方法，区分高/低置信度
+      final result = await PackageOcrService.parseToConfirmations(image.path);
 
-      if (packages.isEmpty) {
+      if (result.isEmpty) {
         if (mounted) _showError('未识别到快递信息，请重试');
         return;
       }
 
-      final notifier = ref.read(packageListProvider.notifier);
-      for (final package in packages) {
-        notifier.addPackage(package);
+      // 高置信度的直接添加
+      if (result.highConfidencePackages.isNotEmpty) {
+        final notifier = ref.read(packageListProvider.notifier);
+        for (final package in result.highConfidencePackages) {
+          notifier.addPackage(package);
+        }
+      }
+
+      // 低置信度的进入待确认区
+      if (result.lowConfidenceConfirmations.isNotEmpty) {
+        ref
+            .read(pendingConfirmationsProvider.notifier)
+            .addAll(result.lowConfidenceConfirmations);
       }
 
       if (mounted) {
-        _showResult(packages);
+        _showConfidenceResult(result);
       }
     } catch (_) {
       if (mounted) {
@@ -58,27 +64,27 @@ class _UploadButtonState extends ConsumerState<UploadButton> {
     }
   }
 
-  void _showResult(List<Package> results) {
-    final buffer = StringBuffer('共识别到 ${results.length} 个快递：\n\n');
-    for (var i = 0; i < results.length; i++) {
-      final p = results[i];
-      buffer.writeln('【${i + 1}】${p.courier.displayName}');
-      if (p.pickupCode.isNotEmpty) buffer.writeln('  取件码: ${p.pickupCode}');
-      if (p.trackingNumber.isNotEmpty && !p.trackingNumber.startsWith('OCR-')) {
-        buffer.writeln('  快递单号: ${p.trackingNumber}');
-      }
-      if (p.location.isNotEmpty) buffer.writeln('  位置: ${p.location}');
-      if (p.description.isNotEmpty && p.description.contains('手机尾号')) {
-        buffer.writeln('  ${p.description}');
-      }
-      buffer.writeln('  状态: ${p.status.label}');
-      if (i < results.length - 1) buffer.writeln();
+  void _showConfidenceResult(OcrParseResult result) {
+    final highCount = result.highConfidencePackages.length;
+    final lowCount = result.lowConfidenceConfirmations.length;
+
+    String message;
+    if (lowCount == 0) {
+      message = '共识别到 $highCount 个快递，已自动添加到包裹列表。';
+    } else if (highCount == 0) {
+      message = '共识别到 $lowCount 个快递，但置信度较低。\n\n已移入「待确认」区域，请确认后再添加。';
+    } else {
+      message = '识别结果：\n'
+          '• $highCount 个高置信度，已自动添加\n'
+          '• $lowCount 个低置信度，需确认\n\n'
+          '低置信度的包裹已移入「待确认」区域。';
     }
+
     showCupertinoDialog(
       context: context,
       builder: (ctx) => CupertinoAlertDialog(
         title: const Text('识别完成'),
-        content: Text(buffer.toString()),
+        content: Text(message),
         actions: [
           CupertinoDialogAction(
             isDefaultAction: true,

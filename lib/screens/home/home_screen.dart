@@ -4,6 +4,7 @@ import '../../constants/app_constants.dart';
 import 'widgets/date_header.dart';
 import 'widgets/hero_card.dart';
 import 'widgets/upload_button.dart';
+import 'widgets/pending_confirmation_section.dart';
 import 'widgets/package_list.dart';
 import 'widgets/completed_section.dart';
 import 'widgets/bottom_tab_bar.dart';
@@ -35,6 +36,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               SizedBox(height: AppSpacing.lg),
               UploadButton(),
               SizedBox(height: AppSpacing.xxl),
+              PendingConfirmationSection(),
+              SizedBox(height: AppSpacing.lg),
               PackageList(),
               SizedBox(height: AppSpacing.lg),
               CompletedSection(),

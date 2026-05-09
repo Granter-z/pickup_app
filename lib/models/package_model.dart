@@ -1,117 +1,39 @@
-import 'package:hive/hive.dart';
+/// 包裹数据模型 - Hive持久化层
+/// 
+/// 职责：
+/// 1. 提供Hive序列化支持
+/// 2. 桥接核心模型和持久化层
+/// 3. 保持向后兼容
+library;
 
-part 'package_model.g.dart';
+import '../core/models/package.dart';
+import '../core/models/package_status.dart';
 
-enum PackageStatus {
-  transit,
-  delivering,
-  arrived,
-  pickedUp,
-}
+// 重新导出核心模型，保持API兼容
+export '../core/models/package.dart';
+export '../core/models/package_status.dart';
 
-enum UrgencyLevel {
-  urgent,
-  warning,
-  normal,
-  low,
-}
-
-enum CourierType {
-  sf,
-  jd,
-  zto,
-  yd,
-  yt,
-  sto,
-  ems,
-  other,
-}
-
-extension CourierTypeX on CourierType {
-  String get displayName {
-    switch (this) {
-      case CourierType.sf:
-        return '顺丰速运';
-      case CourierType.jd:
-        return '京东快递';
-      case CourierType.zto:
-        return '中通快递';
-      case CourierType.yd:
-        return '韵达快递';
-      case CourierType.yt:
-        return '圆通速递';
-      case CourierType.sto:
-        return '申通快递';
-      case CourierType.ems:
-        return 'EMS';
-      case CourierType.other:
-        return '其他';
-    }
-  }
-
-  String get shortName {
-    switch (this) {
-      case CourierType.sf:
-        return '顺丰';
-      case CourierType.jd:
-        return '京东';
-      case CourierType.zto:
-        return '中通';
-      case CourierType.yd:
-        return '韵达';
-      case CourierType.yt:
-        return '圆通';
-      case CourierType.sto:
-        return '申通';
-      case CourierType.ems:
-        return 'EMS';
-      case CourierType.other:
-        return '其他';
-    }
-  }
-}
-
-extension UrgencyLevelX on UrgencyLevel {
-  String get label {
-    switch (this) {
-      case UrgencyLevel.urgent:
-        return '紧急';
-      case UrgencyLevel.warning:
-        return '今日取';
-      case UrgencyLevel.normal:
-        return '明后天';
-      case UrgencyLevel.low:
-        return '不急';
-    }
-  }
-}
-
-@HiveType(typeId: 3)
-class Package {
-  @HiveField(0)
+/// Hive持久化的Package模型
+/// 
+/// 注意：这个类主要用于Hive序列化，
+/// 业务逻辑应该使用核心模型
+/// 
+/// 适配器在 adapters/hive_adapters.dart 中定义
+class HivePackage {
   final String id;
-  @HiveField(1)
   final String trackingNumber;
-  @HiveField(2)
   final CourierType courier;
-  @HiveField(3)
   final String pickupCode;
-  @HiveField(4)
   final String location;
-  @HiveField(5)
   final String description;
-  @HiveField(6)
   final UrgencyLevel urgency;
-  @HiveField(7)
   final PackageStatus status;
-  @HiveField(8)
   final DateTime addedAt;
-  @HiveField(9)
   final DateTime? pickedUpAt;
-  @HiveField(10)
   final bool notifiedArrived;
+  final DateTime? archivedAt;
 
-  const Package({
+  const HivePackage({
     required this.id,
     required this.trackingNumber,
     required this.courier,
@@ -123,9 +45,46 @@ class Package {
     required this.addedAt,
     this.pickedUpAt,
     this.notifiedArrived = false,
+    this.archivedAt,
   });
 
-  Package copyWith({
+  /// 从核心模型创建
+  factory HivePackage.fromPackage(Package package) {
+    return HivePackage(
+      id: package.id,
+      trackingNumber: package.trackingNumber,
+      courier: package.courier,
+      pickupCode: package.pickupCode,
+      location: package.location,
+      description: package.description,
+      urgency: package.urgency,
+      status: package.status,
+      addedAt: package.addedAt,
+      pickedUpAt: package.pickedUpAt,
+      notifiedArrived: package.notifiedArrived,
+      archivedAt: package.archivedAt,
+    );
+  }
+
+  /// 转换为核心模型
+  Package toPackage() {
+    return Package(
+      id: id,
+      trackingNumber: trackingNumber,
+      courier: courier,
+      pickupCode: pickupCode,
+      location: location,
+      description: description,
+      urgency: urgency,
+      status: status,
+      addedAt: addedAt,
+      pickedUpAt: pickedUpAt,
+      notifiedArrived: notifiedArrived,
+      archivedAt: archivedAt,
+    );
+  }
+
+  HivePackage copyWith({
     String? id,
     String? trackingNumber,
     CourierType? courier,
@@ -137,8 +96,9 @@ class Package {
     DateTime? addedAt,
     DateTime? pickedUpAt,
     bool? notifiedArrived,
+    DateTime? archivedAt,
   }) {
-    return Package(
+    return HivePackage(
       id: id ?? this.id,
       trackingNumber: trackingNumber ?? this.trackingNumber,
       courier: courier ?? this.courier,
@@ -150,6 +110,7 @@ class Package {
       addedAt: addedAt ?? this.addedAt,
       pickedUpAt: pickedUpAt ?? this.pickedUpAt,
       notifiedArrived: notifiedArrived ?? this.notifiedArrived,
+      archivedAt: archivedAt ?? this.archivedAt,
     );
   }
 }

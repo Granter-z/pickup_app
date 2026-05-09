@@ -2,14 +2,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../main.dart';
 import '../models/package_model.dart';
-import '../models/status_extension.dart';
+import '../core/models/pending_confirmation.dart';
 import '../services/hero_decision_service.dart';
 
 class PackageListNotifier extends StateNotifier<List<Package>> {
-  final Box<Package> _box = Hive.box<Package>(kPackagesBox);
+  final Box<HivePackage> _box = Hive.box<HivePackage>(kPackagesBox);
 
   PackageListNotifier() : super([]) {
-    state = _box.isNotEmpty ? _box.values.toList() : _initialPackages;
+    state = _box.isNotEmpty 
+        ? _box.values.map((hivePkg) => hivePkg.toPackage()).toList()
+        : _initialPackages;
     _sync();
   }
 
@@ -24,17 +26,11 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
       // 已存在相同快递，整合信息
       final existing = state[existingIndex];
       final updated = existing.copyWith(
-        // 使用新包裹的位置信息（如果有）
         location: package.location.isNotEmpty ? package.location : existing.location,
-        // 使用新包裹的取件码（如果有）
         pickupCode: package.pickupCode.isNotEmpty ? package.pickupCode : existing.pickupCode,
-        // 使用新包裹的描述（如果有）
         description: package.description.isNotEmpty ? package.description : existing.description,
-        // 选择更高的紧急程度
         urgency: _higherUrgency(existing.urgency, package.urgency),
-        // 更新添加时间
         addedAt: package.addedAt.isAfter(existing.addedAt) ? package.addedAt : existing.addedAt,
-        // 如果新包裹是已到达状态，更新状态
         status: package.status.urgencyScore > existing.status.urgencyScore 
             ? package.status 
             : existing.status,
@@ -45,21 +41,13 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
           if (i == existingIndex) updated else state[i],
       ];
     } else {
-      // 不存在重复，直接添加
       state = [...state, package];
     }
     _sync();
   }
   
   UrgencyLevel _higherUrgency(UrgencyLevel a, UrgencyLevel b) {
-    // 紧急程度优先级：urgent > warning > normal > low
-    const order = {
-      UrgencyLevel.urgent: 3,
-      UrgencyLevel.warning: 2,
-      UrgencyLevel.normal: 1,
-      UrgencyLevel.low: 0,
-    };
-    return order[a]! >= order[b]! ? a : b;
+    return a.score >= b.score ? a : b;
   }
 
   void markPickedUp(String id) {
@@ -75,11 +63,25 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     ];
     _sync();
   }
+  
+  /// 自动归档已取件超过7天的包裹
+  void autoArchive() {
+    state = [
+      for (final p in state)
+        p.shouldAutoArchive 
+            ? p.copyWith(
+                status: PackageStatus.archived,
+                archivedAt: DateTime.now(),
+              )
+            : p,
+    ];
+    _sync();
+  }
 
   void _sync() {
     _box.clear();
     for (final p in state) {
-      _box.put(p.id, p);
+      _box.put(p.id, HivePackage.fromPackage(p));
     }
   }
 }
@@ -95,17 +97,13 @@ final pendingPackagesProvider = Provider<List<Package>>((ref) {
       .where((p) => p.status.isPending)
       .toList();
   
-  // 先按取货地点分组，相同地址放在一起
-  // 然后在每个地址组内按紧急程度排序
   pending.sort((a, b) {
-    // 首先按取货地点排序（空地址排在最后）
-    final locationA = a.location.isNotEmpty ? a.location : 'ZZZ'; // 空地址排最后
+    final locationA = a.location.isNotEmpty ? a.location : 'ZZZ';
     final locationB = b.location.isNotEmpty ? b.location : 'ZZZ';
     final locationCompare = locationA.compareTo(locationB);
     if (locationCompare != 0) return locationCompare;
     
-    // 同一地址内按紧急程度排序（高优先级在前）
-    return b.status.urgencyScore.compareTo(a.status.urgencyScore);
+    return b.compositeUrgencyScore.compareTo(a.compositeUrgencyScore);
   });
   
   return pending;
@@ -130,6 +128,78 @@ final groupedPendingPackagesProvider = Provider<Map<String, List<Package>>>((ref
 final heroDecisionProvider = Provider<HeroCardDecision>((ref) {
   final packages = ref.watch(packageListProvider);
   return HeroDecisionService.decide(packages);
+});
+
+// ── 待确认区 ──────────────────────────────────────────────────
+
+/// 待确认包裹管理器
+class PendingConfirmationNotifier extends StateNotifier<List<PendingConfirmation>> {
+  PendingConfirmationNotifier() : super([]);
+
+  /// 添加待确认包裹
+  void add(PendingConfirmation confirmation) {
+    state = [...state, confirmation];
+  }
+
+  /// 批量添加
+  void addAll(List<PendingConfirmation> confirmations) {
+    state = [...state, ...confirmations];
+  }
+
+  /// 确认包裹（移除待确认，返回 Package）
+  Package? confirm(String id) {
+    final index = state.indexWhere((c) => c.id == id);
+    if (index == -1) return null;
+
+    final confirmation = state[index];
+    state = state.where((c) => c.id != id).toList();
+    return confirmation.toPackage();
+  }
+
+  /// 拒绝包裹（直接移除）
+  void reject(String id) {
+    state = state.where((c) => c.id != id).toList();
+  }
+
+  /// 修改后确认
+  Package? confirmWithEdit(String id, {
+    CourierType? courier,
+    String? pickupCode,
+    String? trackingNumber,
+    String? location,
+    PackageStatus? status,
+  }) {
+    final index = state.indexWhere((c) => c.id == id);
+    if (index == -1) return null;
+
+    final original = state[index];
+    final edited = original.copyWith(
+      courier: courier ?? original.courier,
+      pickupCode: pickupCode ?? original.pickupCode,
+      trackingNumber: trackingNumber ?? original.trackingNumber,
+      location: location ?? original.location,
+      status: status ?? original.status,
+    );
+
+    state = state.where((c) => c.id != id).toList();
+    return edited.toPackage();
+  }
+
+  /// 清空所有
+  void clear() {
+    state = [];
+  }
+}
+
+/// 待确认包裹 Provider
+final pendingConfirmationsProvider =
+    StateNotifierProvider<PendingConfirmationNotifier, List<PendingConfirmation>>(
+  (ref) => PendingConfirmationNotifier(),
+);
+
+/// 待确认包裹数量 Provider
+final pendingConfirmationCountProvider = Provider<int>((ref) {
+  return ref.watch(pendingConfirmationsProvider).length;
 });
 
 final _initialPackages = <Package>[

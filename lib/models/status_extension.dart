@@ -1,21 +1,18 @@
+/// 状态UI扩展 - 仅用于UI层
+/// 
+/// 职责：
+/// 1. 提供颜色、图标等视觉属性
+/// 2. 不包含业务逻辑
+/// 3. 依赖Flutter Material Design
+library;
+
 import 'package:flutter/material.dart';
 import '../constants/app_constants.dart';
-import 'package_model.dart';
+import '../core/models/package_status.dart';
 
-extension PackageStatusX on PackageStatus {
-  String get label {
-    switch (this) {
-      case PackageStatus.transit:
-        return '运送中';
-      case PackageStatus.delivering:
-        return '派送中';
-      case PackageStatus.arrived:
-        return '待取件';
-      case PackageStatus.pickedUp:
-        return '已取件';
-    }
-  }
-
+/// 状态视觉属性扩展
+extension PackageStatusUI on PackageStatus {
+  /// 状态颜色
   Color get color {
     switch (this) {
       case PackageStatus.transit:
@@ -26,9 +23,12 @@ extension PackageStatusX on PackageStatus {
         return AppColors.urgent;
       case PackageStatus.pickedUp:
         return AppColors.success;
+      case PackageStatus.archived:
+        return AppColors.textTertiary;
     }
   }
 
+  /// 状态背景颜色
   Color get bgColor {
     switch (this) {
       case PackageStatus.transit:
@@ -39,24 +39,8 @@ extension PackageStatusX on PackageStatus {
         return AppColors.urgentBg;
       case PackageStatus.pickedUp:
         return AppColors.successBg;
+      case PackageStatus.archived:
+        return const Color(0xFFF2F2F7);
     }
   }
-
-  /// HeroCard priority score: higher = more urgent
-  int get urgencyScore {
-    switch (this) {
-      case PackageStatus.arrived:
-        return 85;
-      case PackageStatus.delivering:
-        return 50;
-      case PackageStatus.transit:
-        return 20;
-      case PackageStatus.pickedUp:
-        return 0;
-    }
-  }
-
-  bool get isArrived => this == PackageStatus.arrived;
-  bool get isPending => this != PackageStatus.pickedUp;
-  bool get isCompleted => this == PackageStatus.pickedUp;
 }

@@ -16,9 +16,9 @@ Future<void> main() async {
     ..registerAdapter(PackageStatusAdapter())
     ..registerAdapter(UrgencyLevelAdapter())
     ..registerAdapter(CourierTypeAdapter())
-    ..registerAdapter(PackageAdapter());
+    ..registerAdapter(HivePackageAdapter());
 
-  await Hive.openBox<Package>(kPackagesBox);
+  await Hive.openBox<HivePackage>(kPackagesBox);
 
   runApp(const ProviderScope(child: PickupApp()));
 }

@@ -94,9 +94,13 @@ class _CompletedCard extends StatelessWidget {
       ),
       child: Row(
         children: [
-          const Icon(
-            CupertinoIcons.checkmark_circle_fill,
-            color: AppColors.success,
+          Icon(
+            package.status == PackageStatus.archived
+                ? CupertinoIcons.archivebox_fill
+                : CupertinoIcons.checkmark_circle_fill,
+            color: package.status == PackageStatus.archived
+                ? AppColors.textTertiary
+                : AppColors.success,
             size: 20,
           ),
           const SizedBox(width: AppSpacing.md),
@@ -106,11 +110,15 @@ class _CompletedCard extends StatelessWidget {
               children: [
                 Text(
                   '${package.courier.shortName} · ${package.description}',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
-                    decoration: TextDecoration.lineThrough,
+                    color: package.status == PackageStatus.archived
+                        ? AppColors.textTertiary
+                        : AppColors.textSecondary,
+                    decoration: package.status == PackageStatus.archived
+                        ? TextDecoration.none
+                        : TextDecoration.lineThrough,
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
