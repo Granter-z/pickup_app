@@ -1,0 +1,252 @@
+{
+  "cainiao/06fc8bdc508f5d6a68d73cfa1addbabc.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": "13-2-5039",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "76929191489436",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "圆通",
+        "pickupCode": "15-5-5014",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "YT8865264879639",
+        "status": "arrived"
+      }
+    }
+  ],
+  "cainiao/37faf82fbedaba79db189b1e79b3e190.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": "15-3-6007",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "76929138701037",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "圆通",
+        "pickupCode": "15-5-6006",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "YT8866295706389",
+        "status": "arrived"
+      }
+    }
+  ],
+  "cainiao/561888fed9b6c3d12a9683d800fcf7e4.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": "15-3-6007",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "76929138701037",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "圆通",
+        "pickupCode": "15-5-6006",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "YT8866295706389",
+        "status": "arrived"
+      }
+    }
+  ],
+  "cainiao/61a5b3c8eaf81bb24341c11fa79ad39c.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": "13-2-5039",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "76929191489436",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "圆通",
+        "pickupCode": "15-5-5014",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "YT8865264879639",
+        "status": "arrived"
+      }
+    }
+  ],
+  "cainiao/f4a653a58641097bd559ea019b547512.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": "15-3-6007",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "76929138701037",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "圆通",
+        "pickupCode": "15-5-6006",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "YT8866295706389",
+        "status": "arrived"
+      }
+    }
+  ],
+  "douyin/0ac9d0e3bc51e03864b288d721f7d18c.jpg": [
+    {
+      "expected": {
+        "courier": "极兔速递",
+        "pickupCode": null,
+        "address": "廊坊临空转运中心",
+        "trackingNumber": "JT2184177458096",
+        "status": "in_transit"
+      }
+    }
+  ],
+  "douyin/57de0e6f33959fa63da86a27facd370d.jpg": [
+    {
+      "expected": {
+        "courier": "极兔速递",
+        "pickupCode": null,
+        "address": "漯河集货点",
+        "trackingNumber": "JT2184460562605",
+        "status": "in_transit"
+      }
+    }
+  ],
+  "douyin/8cd250710f02098d6890a5a739a0e1e7.jpg": [
+    {
+      "expected": {
+        "courier": "极兔速递",
+        "pickupCode": null,
+        "address": "漯河转运中心",
+        "trackingNumber": "JT2184460562605",
+        "status": "in_transit"
+      }
+    }
+  ],
+  "douyin/c18298cb21052313b7cf329050cda5ca.jpg": [
+    {
+      "expected": {
+        "courier": "韵达",
+        "pickupCode": "793167",
+        "address": "绿城诚园小区北门对面大院绿城诚园驿站",
+        "trackingNumber": "321117675065648",
+        "status": "arrived"
+      }
+    }
+  ],
+  "douyin/c5f469ba58af11ca011245db3cf4f666.jpg": [
+    {
+      "expected": {
+        "courier": "申通",
+        "pickupCode": "418226",
+        "address": "绿城诚园驿站",
+        "trackingNumber": "770317896774824",
+        "status": "arrived"
+      }
+    }
+  ],
+  "douyin/f2ec4d9cc5349b11babe4690314faca4.jpg": [
+    {
+      "expected": {
+        "courier": "极兔速递",
+        "pickupCode": null,
+        "address": "廊坊临空转运中心",
+        "trackingNumber": "JT2184177458096",
+        "status": "in_transit"
+      }
+    }
+  ],
+  "douyin/f4d11101675c786c24a684b76cccac79.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": "15-3-6007",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "76929138701037",
+        "status": "arrived"
+      }
+    }
+  ],
+  "pdd/333bd308701811fc7ef2e9e84007df61.jpg": [
+    {
+      "expected": {
+        "courier": "申通",
+        "pickupCode": "7-3-6007",
+        "address": "绿城诚园北门对面大院驿站",
+        "trackingNumber": "777407042267539",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "圆通",
+        "pickupCode": "06389",
+        "address": "邢台信都区绿城诚园北门店",
+        "trackingNumber": "YT8866295706389",
+        "status": "arrived"
+      }
+    }
+  ],
+  "pdd/36a20c92deec01a79bb7edf3f0f67f53.jpg": [
+    {
+      "expected": {
+        "courier": "中通",
+        "pickupCode": null,
+        "address": "南昌转运中心",
+        "trackingNumber": "79103298300372",
+        "status": "in_transit"
+      }
+    }
+  ],
+  "pdd/88f58dc0ba6e16647aaafe7e5e4492d8.jpg": [
+    {
+      "expected": {
+        "courier": "极兔速递",
+        "pickupCode": "5-2-7029",
+        "address": "绿城诚园北门对面大院驿站",
+        "trackingNumber": "JT2184177458096",
+        "status": "arrived"
+      }
+    },
+    {
+      "expected": {
+        "courier": "申通",
+        "pickupCode": "7-3-6007",
+        "address": "绿城诚园北门对面大院驿站",
+        "trackingNumber": "777407042267539",
+        "status": "arrived"
+      }
+    }
+  ],
+  "pdd/d35d748f6bc0fa6ae18d5d449cbd5e95.jpg": [
+    {
+      "expected": {
+        "courier": "申通",
+        "pickupCode": "3-3-5016",
+        "address": "绿城诚园北门对面大院驿站",
+        "trackingNumber": "777406671035785",
+        "status": "arrived"
+      }
+    }
+  ],
+  "pdd/ff860a08c2fe6be032237bf1ff7fbe58.jpg": [
+    {
+      "expected": {
+        "courier": "申通",
+        "pickupCode": "3-3-5016",
+        "address": "绿城诚园北门对面大院驿站",
+        "trackingNumber": "777406671035785",
+        "status": "arrived"
+      }
+    }
+  ]
+}
