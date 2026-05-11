@@ -370,6 +370,61 @@ class LocationExtractor {
   }
 }
 
+/// 站点名称提取器
+///
+/// 从文本中识别站点名称（菜鸟驿站、丰巢等），作为 location 的 fallback。
+class StationExtractor {
+  static const _stationKeywords = [
+    '菜鸟驿站', '丰巢', '快递柜', '妈妈驿站', '驿站',
+    '菜鸟', '菜乌',
+    '代收点', '营业部', '网点', '自提点', '服务点', '门店',
+  ];
+
+  /// 站点名称的 OCR 变体（只含可能出现在 location 开头的前缀）
+  static const _stationPrefixVariants = [
+    '菜鸟驿站', '菜鸟', '鸟一', '菜乌',
+    '丰巢', '快递柜',
+    '妈妈驿站', '妈妈',
+    '驿站', '代收点', '营业部',
+    '网点', '自提点', '服务点',
+  ];
+
+  /// 站点名称标准化映射
+  static const Map<String, String> _stationNormalizeMap = {
+    '菜鸟': '菜鸟驿站',
+    '菜乌': '菜鸟驿站',
+    '鸟一': '菜鸟驿站',
+    '妈妈': '妈妈驿站',
+  };
+
+  /// 从文本中提取站点名称
+  static String extract(String text) {
+    for (final kw in _stationKeywords) {
+      if (text.contains(kw)) {
+        return _stationNormalizeMap[kw] ?? kw;
+      }
+    }
+    return '';
+  }
+
+  /// 清除 location 开头残留的站点名称前缀（含 OCR 变体）
+  static String cleanLocation(String location, String station) {
+    if (location.isEmpty || station.isEmpty) return location;
+
+    var cleaned = location;
+    for (final variant in _stationPrefixVariants) {
+      final idx = cleaned.indexOf(variant);
+      if (idx >= 0 && idx <= 3) {
+        cleaned = cleaned.substring(idx + variant.length);
+        break;
+      }
+    }
+    // 去掉开头残留的标点/符号
+    cleaned = cleaned.replaceFirst(RegExp(r'^[·、，,.\s]+'), '');
+    return cleaned;
+  }
+}
+
 /// 运单号提取器
 class TrackingNumberExtractor {
   static ExtractionResult<String> extract(String text) {
