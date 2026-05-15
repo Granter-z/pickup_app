@@ -17,14 +17,15 @@ import 'regex_patterns.dart';
 /// 文本解析器
 class TextParser {
   /// 单号前缀 → 快递公司映射
+  /// 使用位数范围而非精确值，以容忍OCR漏识别或多识别数字
   static final Map<RegExp, CourierType> _trackingPrefixMap = {
-    RegExp(r'JT\d{13}'): CourierType.jt,   // 极兔
-    RegExp(r'SF\d{12}'): CourierType.sf,   // 顺丰
-    RegExp(r'YT\d{13}'): CourierType.yt,   // 圆通
-    RegExp(r'ZT\d{12}'): CourierType.zto,  // 中通
-    RegExp(r'YD\d{13}'): CourierType.yd,   // 韵达
-    RegExp(r'ST\d{12}'): CourierType.sto,  // 申通
-    RegExp(r'JD\d{12}'): CourierType.jd,   // 京东
+    RegExp(r'JT\d{10,20}'): CourierType.jt,   // 极兔
+    RegExp(r'SF\d{10,20}'): CourierType.sf,   // 顺丰
+    RegExp(r'YT\d{10,20}'): CourierType.yt,   // 圆通
+    RegExp(r'ZT\d{10,20}'): CourierType.zto,  // 中通
+    RegExp(r'YD\d{10,20}'): CourierType.yd,   // 韵达
+    RegExp(r'ST\d{10,20}'): CourierType.sto,  // 申通
+    RegExp(r'JD\d{10,20}'): CourierType.jd,   // 京东
   };
 
   /// 通过单号前缀反推快递公司
@@ -55,7 +56,7 @@ class TextParser {
     final keywordCourier = CourierExtractor.extract(raw);
     
     // 如果单号前缀匹配成功，优先使用
-    final courier = trackingCourier.confidence > 0 
+    var courier = trackingCourier.confidence > 0 
         ? trackingCourier 
         : keywordCourier;
     
@@ -63,7 +64,21 @@ class TextParser {
     var trackingNumber = TrackingNumberExtractor.extract(raw);
     final phoneTail = PhoneTailExtractor.extract(raw);
 
-    // 兜底：courier 已识别但单号为空 → 用宽松长数字匹配
+    // 兜底1：courier 为 "other" 但运单号有已知前缀 → 从运单号反推快递商
+    // 例如：PDD截图OCR未识别"圆通"但识别出"YT8866295706389"
+    if (courier.value == CourierType.other &&
+        trackingNumber.value.isNotEmpty) {
+      final inferredCourier = _extractCourierFromTracking(trackingNumber.value);
+      if (inferredCourier.confidence > 0) {
+        courier = ExtractionResult<CourierType>(
+          value: inferredCourier.value,
+          confidence: 0.88,
+          source: 'tracking_number_fallback',
+        );
+      }
+    }
+
+    // 兜底2：courier 已识别但单号为空 → 用宽松长数字匹配
     // OCR 场景：单号常被识别为无标签的长数字串
     if (trackingNumber.value.isEmpty && courier.confidence > 0) {
       final looseMatch = RegexPatterns.looseNumericTracking.firstMatch(raw);
@@ -79,8 +94,15 @@ class TextParser {
       }
     }
     final locationResult = LocationExtractor.extractTyped(raw);
+    final stationName = StationExtractor.extract(raw);
+    final station = ExtractionResult(
+      value: stationName,
+      confidence: stationName.isNotEmpty ? 0.9 : 0.0,
+      source: stationName.isNotEmpty ? 'station_keyword' : null,
+    );
+    final cleanedLocation = StationExtractor.cleanLocation(locationResult.value, stationName);
     final location = ExtractionResult(
-      value: locationResult.value,
+      value: cleanedLocation,
       confidence: locationResult.confidence,
       source: locationResult.source,
     );
@@ -121,6 +143,7 @@ class TextParser {
       phoneTail: phoneTail,
       location: location,
       locationType: locationResult.type,
+      station: station,
       status: status,
       warnings: warnings,
       overallConfidence: overallConfidence,

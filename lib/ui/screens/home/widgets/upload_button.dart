@@ -5,6 +5,7 @@ import 'package:image_picker/image_picker.dart';
 import '../../../constants/app_constants.dart';
 import '../../../providers/package_provider.dart';
 import '../../../../app/ocr_pipeline.dart';
+import 'mock_import_dialog.dart';
 
 class UploadButton extends ConsumerStatefulWidget {
   const UploadButton({super.key});
@@ -138,6 +139,13 @@ class _UploadButtonState extends ConsumerState<UploadButton> {
                         _pickAndRecognize(ImageSource.camera);
                       },
                       child: const Text('拍照识别'),
+                    ),
+                    CupertinoActionSheetAction(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        showMockImportDialog(context);
+                      },
+                      child: const Text('导入测试短信'),
                     ),
                   ],
                   cancelButton: CupertinoActionSheetAction(

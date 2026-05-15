@@ -31,6 +31,13 @@ class StatusDictionary {
     '已入柜': PackageStatus.arrived,
     '待取件': PackageStatus.arrived,
     '到营业部': PackageStatus.arrived,
+    '已到达顺丰': PackageStatus.arrived,
+    '已到达申通': PackageStatus.arrived,
+    '已到达圆通': PackageStatus.arrived,
+    '已到达中通': PackageStatus.arrived,
+    '已到达韵达': PackageStatus.arrived,
+    '已到达极兔': PackageStatus.arrived,
+    '已到达': PackageStatus.arrived,
     
     // 派送中（高置信度）
     '派送中': PackageStatus.delivering,

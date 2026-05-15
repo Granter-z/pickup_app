@@ -28,21 +28,25 @@ class OcrPipeline {
       return OcrParseResult.empty();
     }
 
+    return parseRawText(ocrText);
+  }
+
+  static Future<OcrParseResult> parseRawText(String rawText) async {
     DebugTrace.separator('TEXT SANITIZATION');
 
     print('===============================================');
-    print('  [LAYER 1] OCR RAW TEXT');
+    print('  [LAYER 1] RAW TEXT');
     print('===============================================');
-    print(ocrText);
-    print('  length: ${ocrText.length}');
+    print(rawText);
+    print('  length: ${rawText.length}');
     print('');
 
-    final sanitizedResult = TextSanitizer.cleanWithAnalysis(ocrText);
+    final sanitizedResult = TextSanitizer.cleanWithAnalysis(rawText);
     print('===============================================');
     print('  [LAYER 2] SANITIZED TEXT');
     print('===============================================');
     print(sanitizedResult.cleaned);
-    print('  original length: ${ocrText.length}');
+    print('  original length: ${rawText.length}');
     print('  cleaned length: ${sanitizedResult.cleaned.length}');
     print('  keptLines: ${sanitizedResult.keptLines}');
     print('  removedLines: ${sanitizedResult.removedLines}');
@@ -104,19 +108,20 @@ class OcrPipeline {
         print('  | pickupCode:    "${result.pickupCode.value}" (conf: ${result.pickupCode.confidence})');
         print('  | trackingNumber: "${result.trackingNumber.value}" (conf: ${result.trackingNumber.confidence})');
         print('  | location:      "${result.location.value}" (conf: ${result.location.confidence})');
+        print('  | station:       "${result.station.value}" (conf: ${result.station.confidence})');
         print('  | status:        ${result.status.value} (conf: ${result.status.confidence})');
         print('  | overallConf:   ${confidence.toStringAsFixed(2)}');
         print('  | isValid:       ${result.isValid}');
         print('  +-----------------------------------------');
 
-        final normalized = TextNormalizer.normalize(ocrText);
+        final normalized = TextNormalizer.normalize(rawText);
         final fingerprint = TextNormalizer.transitFingerprint(
-          courierName, ocrText,
+          courierName, rawText,
           trackingNumber: result.trackingNumber.value,
         );
         print('  | normalized:    "$normalized"');
         print('  | fingerprint:   "$fingerprint"');
-        DebugTrace.normalizedText(ocrText, normalized, fingerprint ?? '(null)');
+        DebugTrace.normalizedText(rawText, normalized, fingerprint ?? '(null)');
 
         final isTransit = result.status.value == PackageStatus.transit ||
             result.status.value == PackageStatus.delivering;
@@ -126,19 +131,19 @@ class OcrPipeline {
 
         if (isTransit && !hasPickupCode && confidence >= 0.5) {
           DebugTrace.separator('TRANSIT + NO PICKUP CODE -> SILENT PACKAGE');
-          highConfidence.add(_toPackage(result, id, ocrText));
+          highConfidence.add(_toPackage(result, id, rawText));
         } else if (isArrived && (!hasPickupCode || !hasLocation)) {
           DebugTrace.separator('ARRIVED + INCOMPLETE INFO -> PENDING CONFIRMATION');
-          lowConfidence.add(_toConfirmation(result, id, ocrText));
+          lowConfidence.add(_toConfirmation(result, id, rawText));
         } else if (conflictResult.isHighConflict) {
           DebugTrace.separator('HIGH CONFLICT -> PENDING CONFIRMATION');
-          lowConfidence.add(_toConfirmation(result, id, ocrText));
+          lowConfidence.add(_toConfirmation(result, id, rawText));
         } else if (confidence >= 0.7) {
           DebugTrace.separator('HIGH CONFIDENCE -> PACKAGE');
-          highConfidence.add(_toPackage(result, id, ocrText));
+          highConfidence.add(_toPackage(result, id, rawText));
         } else {
           DebugTrace.separator('LOW CONFIDENCE -> PENDING CONFIRMATION');
-          lowConfidence.add(_toConfirmation(result, id, ocrText));
+          lowConfidence.add(_toConfirmation(result, id, rawText));
         }
       } catch (e, stackTrace) {
         DebugTrace.error('Error processing parseResult #$i', error: e, stackTrace: stackTrace);
@@ -154,7 +159,7 @@ class OcrPipeline {
     return OcrParseResult(
       highConfidencePackages: highConfidence,
       lowConfidenceConfirmations: lowConfidence,
-      rawText: ocrText,
+      rawText: rawText,
     );
   }
 
@@ -171,6 +176,7 @@ class OcrPipeline {
       courier: result.courier.value,
       pickupCode: result.pickupCode.value,
       location: result.location.value,
+      originalStation: result.station.value,
       urgency: UrgencyLevel.normal,
       status: result.status.value,
       addedAt: DateTime.now(),
@@ -185,6 +191,7 @@ class OcrPipeline {
       courier: result.courier.value,
       pickupCode: result.pickupCode.value,
       location: result.location.value,
+      originalStation: result.station.value,
       description: _buildDescription(result),
       urgency: UrgencyLevel.normal,
       status: result.status.value,
@@ -213,6 +220,7 @@ class OcrPipeline {
       pickupCode: result.pickupCode.value,
       trackingNumber: result.trackingNumber.value,
       location: result.location.value,
+      originalStation: result.station.value,
       status: result.status.value,
       confidence: result.overallConfidence,
       fieldConfidence: FieldConfidence(

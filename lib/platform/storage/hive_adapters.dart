@@ -91,13 +91,15 @@ class HivePackageAdapter extends TypeAdapter<HivePackage> {
       notifiedArrived: fields[10] as bool? ?? false,
       archivedAt: fields[11] as DateTime?,
       transitFingerprint: fields[12] as String?,
+      originalStation: fields[13] as String? ?? '',
+      fingerprint: fields[14] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, HivePackage obj) {
     writer
-      ..writeByte(13)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -123,6 +125,10 @@ class HivePackageAdapter extends TypeAdapter<HivePackage> {
       ..writeByte(11)
       ..write(obj.archivedAt)
       ..writeByte(12)
-      ..write(obj.transitFingerprint);
+      ..write(obj.transitFingerprint)
+      ..writeByte(13)
+      ..write(obj.originalStation)
+      ..writeByte(14)
+      ..write(obj.fingerprint);
   }
 }

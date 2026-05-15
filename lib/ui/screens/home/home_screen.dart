@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../constants/app_constants.dart';
+import '../../../platform/notification/notification_listener_service.dart';
 import 'widgets/date_header.dart';
 import 'widgets/hero_card.dart';
 import 'widgets/upload_button.dart';
@@ -18,6 +19,31 @@ class HomeScreen extends ConsumerStatefulWidget {
 
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentTab = 0;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      _checkNotificationPermission();
+    });
+  }
+
+  void _checkNotificationPermission() async {
+    final service = ref.read(notificationListenerServiceProvider);
+    final granted = await service.isPermissionGranted();
+    if (!granted && mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: const Text('开启通知监听可自动捕获快递通知'),
+          action: SnackBarAction(
+            label: '去开启',
+            onPressed: () => service.openSettings(),
+          ),
+          duration: const Duration(seconds: 5),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {

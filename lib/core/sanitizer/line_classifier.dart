@@ -67,11 +67,6 @@ class LineClassifier {
       return LineAnalysis(text: line, type: LineType.noise, confidence: 1.0, reason: 'empty');
     }
 
-    // 太短的行（可能是噪音）
-    if (trimmed.length < 3) {
-      return LineAnalysis(text: line, type: LineType.noise, confidence: 0.8, reason: 'too_short');
-    }
-
     // 物流信息优先于噪音判断
     // 原因：物流行可能同时包含噪音词（如"订单编号"附近的快递公司名）
 
@@ -98,6 +93,14 @@ class LineClassifier {
     // 检查是否为联系信息行
     if (_isContactLine(trimmed)) {
       return LineAnalysis(text: line, type: LineType.contact, confidence: 0.7, reason: 'contact_pattern');
+    }
+
+    // 超短行特殊处理：已知的短快递商名称（如"申通"2字）也应保留
+    if (trimmed.length < 3) {
+      if (LogisticsKeywords.courierNames.any((kw) => trimmed == kw)) {
+        return LineAnalysis(text: line, type: LineType.logistics, confidence: 0.9, reason: 'short_courier_name');
+      }
+      return LineAnalysis(text: line, type: LineType.noise, confidence: 0.8, reason: 'too_short');
     }
 
     // 物流行都没命中，才检查噪音

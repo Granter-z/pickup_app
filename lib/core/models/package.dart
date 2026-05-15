@@ -7,6 +7,7 @@
 library;
 
 import 'package_status.dart';
+import 'logistics_event.dart';
 
 /// 快递公司类型
 enum CourierType {
@@ -124,6 +125,7 @@ class Package {
   final CourierType courier;
   final String pickupCode;
   final String location;
+  final String originalStation;
   final String description;
   final UrgencyLevel urgency;
   final PackageStatus status;
@@ -133,13 +135,23 @@ class Package {
   final bool notifiedArrived;
   final List<StatusTransition> statusHistory;
   final String? transitFingerprint;  // transit 阶段的弱身份标识
+  final List<LogisticsEvent> events;
+  final String fingerprint;  // 包裹唯一识别指纹
 
-  const Package({
+  String get displayLocation {
+    if (location.isNotEmpty && originalStation.isNotEmpty) return '$originalStation · $location';
+    if (location.isNotEmpty) return location;
+    if (originalStation.isNotEmpty) return originalStation;
+    return '未知驿站';
+  }
+
+  Package({
     required this.id,
     required this.trackingNumber,
     required this.courier,
     this.pickupCode = '',
     this.location = '',
+    this.originalStation = '',
     this.description = '',
     required this.urgency,
     required this.status,
@@ -149,7 +161,29 @@ class Package {
     this.notifiedArrived = false,
     this.statusHistory = const [],
     this.transitFingerprint,
-  });
+    this.events = const [],
+    String? fingerprint,
+  }) : this.fingerprint = fingerprint ?? buildFingerprintStatic(pickupCode, courier);
+
+  /// 构建包裹指纹
+  /// 优先级：pickupCode > courier (carrier) > phoneTail
+  static String buildFingerprintStatic(String pickupCode, CourierType courier) {
+    final carrierName = courier.displayName;
+    return '${pickupCode}_${carrierName}'
+        .toLowerCase()
+        .trim();
+  }
+
+  /// 构建包裹指纹（带 phoneTail）
+  static String buildFingerprint({
+    required String pickupCode,
+    String? carrier,
+    String? phoneTail,
+  }) {
+    return '${pickupCode}_${carrier ?? ''}_${phoneTail ?? ''}'
+        .toLowerCase()
+        .trim();
+  }
 
   Package copyWith({
     String? id,
@@ -157,6 +191,7 @@ class Package {
     CourierType? courier,
     String? pickupCode,
     String? location,
+    String? originalStation,
     String? description,
     UrgencyLevel? urgency,
     PackageStatus? status,
@@ -166,6 +201,8 @@ class Package {
     bool? notifiedArrived,
     List<StatusTransition>? statusHistory,
     String? transitFingerprint,
+    List<LogisticsEvent>? events,
+    String? fingerprint,
   }) {
     return Package(
       id: id ?? this.id,
@@ -173,6 +210,7 @@ class Package {
       courier: courier ?? this.courier,
       pickupCode: pickupCode ?? this.pickupCode,
       location: location ?? this.location,
+      originalStation: originalStation ?? this.originalStation,
       description: description ?? this.description,
       urgency: urgency ?? this.urgency,
       status: status ?? this.status,
@@ -182,6 +220,8 @@ class Package {
       notifiedArrived: notifiedArrived ?? this.notifiedArrived,
       statusHistory: statusHistory ?? this.statusHistory,
       transitFingerprint: transitFingerprint ?? this.transitFingerprint,
+      events: events ?? this.events,
+      fingerprint: fingerprint ?? this.fingerprint,
     );
   }
 

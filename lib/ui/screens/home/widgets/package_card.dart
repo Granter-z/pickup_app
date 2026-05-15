@@ -6,6 +6,9 @@ import '../../../constants/app_constants.dart';
 import '../../../theme/status_extension.dart';
 import '../../../../platform/storage/hive_package.dart';
 import '../../../providers/package_provider.dart';
+import '../../../providers/event_provider.dart';
+import 'package_timeline_widget.dart';
+import '../package_detail_page.dart';
 
 class PackageCard extends ConsumerWidget {
   final Package package;
@@ -25,6 +28,9 @@ class PackageCard extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final events = ref.watch(packageEventsProvider(package.id));
+    final hasEvents = events.isNotEmpty;
+
     return Dismissible(
       key: ValueKey(package.id),
       direction: DismissDirection.endToStart,
@@ -62,130 +68,200 @@ class PackageCard extends ConsumerWidget {
         );
 
         if (confirmed == true) {
+          // 创建签收事件
+          final aggregator = ref.read(eventAggregatorProvider);
+          aggregator.createSignedEvent(package, source: 'manual');
           ref.read(packageListProvider.notifier).markPickedUp(package.id);
         }
         return false;
       },
-      child: Container(
-        padding: const EdgeInsets.all(AppSpacing.lg),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppRadius.lg),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.04),
-              blurRadius: 8,
-              offset: const Offset(0, 2),
+      child: GestureDetector(
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => PackageDetailPage(package),
             ),
-          ],
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Container(
-                  width: 40,
-                  height: 40,
-                  decoration: BoxDecoration(
-                    color: package.status.bgColor,
-                    borderRadius: BorderRadius.circular(AppRadius.md),
+          );
+        },
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppRadius.lg),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: package.status.bgColor,
+                      borderRadius: BorderRadius.circular(AppRadius.md),
+                    ),
+                    child: Icon(
+                      _courierIcon,
+                      color: package.status.color,
+                      size: 20,
+                    ),
                   ),
-                  child: Icon(
-                    _courierIcon,
-                    color: package.status.color,
-                    size: 20,
-                  ),
-                ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Text(
-                            package.courier.shortName,
-                            style: const TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
+                  const SizedBox(width: AppSpacing.md),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          children: [
+                            Text(
+                              package.courier.shortName,
+                              style: const TextStyle(
+                                fontSize: 15,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.textPrimary,
+                              ),
                             ),
-                          ),
-                          if (package.pickupCode.isNotEmpty) ...[
-                            const SizedBox(width: AppSpacing.sm),
-                            Container(
-                              padding: const EdgeInsets.symmetric(
-                                horizontal: 6,
-                                vertical: 2,
-                              ),
-                              decoration: BoxDecoration(
-                                color: AppColors.background,
-                                borderRadius:
-                                    BorderRadius.circular(AppRadius.sm),
-                              ),
-                              child: Text(
-                                '取件码 ${package.pickupCode}',
-                                style: const TextStyle(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppColors.textSecondary,
+                            if (package.pickupCode.isNotEmpty) ...[
+                              const SizedBox(width: AppSpacing.sm),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 6,
+                                  vertical: 2,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.background,
+                                  borderRadius:
+                                      BorderRadius.circular(AppRadius.sm),
+                                ),
+                                child: Text(
+                                  '取件码 ${package.pickupCode}',
+                                  style: const TextStyle(
+                                    fontSize: 11,
+                                    fontWeight: FontWeight.w500,
+                                    color: AppColors.textSecondary,
+                                  ),
                                 ),
                               ),
-                            ),
+                            ],
+                            if (hasEvents) ...[
+                              const SizedBox(width: AppSpacing.sm),
+                              Icon(
+                                CupertinoIcons.clock,
+                                size: 14,
+                                color: AppColors.textTertiary,
+                              ),
+                            ],
                           ],
-                        ],
-                      ),
-                      const SizedBox(height: 2),
-                      Text(
-                        package.description.isNotEmpty
-                            ? package.description
-                            : package.trackingNumber,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          package.description.isNotEmpty
+                              ? package.description
+                              : package.trackingNumber,
+                          style: const TextStyle(
+                            fontSize: 13,
+                            color: AppColors.textSecondary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ],
+                    ),
+                  ),
+                  _StatusBadge(status: package.status),
+                ],
+              ),
+              if (package.displayLocation.isNotEmpty) ...[
+                const SizedBox(height: AppSpacing.md),
+                Row(
+                  children: [
+                    const Icon(
+                      CupertinoIcons.location_solid,
+                      size: 14,
+                      color: AppColors.textTertiary,
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    Expanded(
+                      child: Text(
+                        package.displayLocation,
                         style: const TextStyle(
                           fontSize: 13,
-                          color: AppColors.textSecondary,
+                          color: AppColors.textTertiary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
-                ),
-                _StatusBadge(status: package.status),
-              ],
-            ),
-            if (package.location.isNotEmpty) ...[
-              const SizedBox(height: AppSpacing.md),
-              Row(
-                children: [
-                  const Icon(
-                    CupertinoIcons.location_solid,
-                    size: 14,
-                    color: AppColors.textTertiary,
-                  ),
-                  const SizedBox(width: AppSpacing.xs),
-                  Expanded(
-                    child: Text(
-                      package.location,
+                    ),
+                    Text(
+                      _timeAgo(package.addedAt),
                       style: const TextStyle(
-                        fontSize: 13,
+                        fontSize: 12,
                         color: AppColors.textTertiary,
                       ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
                     ),
-                  ),
-                  Text(
-                    _timeAgo(package.addedAt),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: AppColors.textTertiary,
+                  ],
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showTimelineDialog(BuildContext context) {
+    showCupertinoModalPopup(
+      context: context,
+      builder: (ctx) => Container(
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(AppRadius.lg)),
+        ),
+        child: SafeArea(
+          top: false,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Padding(
+                padding: const EdgeInsets.all(AppSpacing.lg),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${package.courier.shortName} - 物流轨迹',
+                      style: const TextStyle(
+                        fontSize: 17,
+                        fontWeight: FontWeight.w600,
+                      ),
                     ),
-                  ),
-                ],
+                    CupertinoButton(
+                      padding: EdgeInsets.zero,
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Icon(CupertinoIcons.xmark_circle_fill, color: AppColors.textTertiary),
+                    ),
+                  ],
+                ),
+              ),
+              Divider(height: 1, color: AppColors.separator),
+              SizedBox(
+                height: MediaQuery.of(context).size.height * 0.5,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+                  child: PackageTimelineWidget(package: package),
+                ),
               ),
             ],
-          ],
+          ),
         ),
       ),
     );

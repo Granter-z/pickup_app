@@ -307,5 +307,46 @@ YTO 圆通速递 15-5-6006
       expect(r.status.value.toString(), contains('transit'), reason: '状态应为运输中');
       expect(r.location.value, contains('河北省邢台市信都区'), reason: '地址不匹配');
     });
+
+    test('图片9: PDD - 地址前带"支持退换货"前缀应被过滤', () {
+      final ocrText = '''我的订单
+全部 待付款 待发货 待收货 评价
+
+极兔速递 JT2184177458096 复制
+已到达 待取件
+
+取件码 5-2-7029
+
+支持退换货 绿城诚园北门对面大院驿站
+
+申通快递 777407042267539 复制
+已到达 待取件
+
+取件码 7-3-6007
+
+支持退换货 绿城诚园北门对面大院驿站
+
+实付款 共减207.02 合计1991.98''';
+
+      final sanitized = TextSanitizer.cleanWithAnalysis(ocrText);
+      print('清洗后 (${sanitized.keptLines}行保留):');
+      print(sanitized.cleaned);
+
+      final results = TextParser.parseMulti(sanitized.cleaned);
+
+      print('图片9 - 识别到${results.length}个包裹:');
+      for (var i = 0; i < results.length; i++) {
+        final r = results[i];
+        final cname = r.courier.value.toString().split('.').last;
+        print('  包裹$i: $cname | 码:${r.pickupCode.value} | 单:${r.trackingNumber.value} | 地:${r.location.value} | 态:${r.status.value}');
+      }
+
+      expect(results.length, greaterThanOrEqualTo(2), reason: '应识别到至少2个包裹');
+
+      for (final r in results) {
+        expect(r.location.value, isNot(contains('支持退换货')),
+            reason: '地址不应包含"支持退换货"前缀');
+      }
+    });
   });
 }

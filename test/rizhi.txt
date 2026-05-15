@@ -1,0 +1,1759 @@
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【园通速递】您的快仲已到刑台信都绿诚园北门店，取件码7—3—6O07
+I/flutter ( 4914):   length: 34
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【园通速递】您的快仲已到刑台信都绿诚园北门店，取件码7—3—6O07
+I/flutter ( 4914):   original length: 34
+I/flutter ( 4914):   cleaned length: 34
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 34
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 圆通速递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode:  (0.0)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location: 刑台信都绿诚园北门店 (0.8, arrival_format)
+I/flutter ( 4914): status: 运送中 (0.4, default_transit)
+I/flutter ( 4914): overallConfidence: 0.7166666666666667
+I/flutter ( 4914): isValid: true canCreatePackage: false
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914):   warning: 状态识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       yt (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "" (conf: 0.0)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "刑台信都绿诚园北门店" (conf: 0.8)
+I/flutter ( 4914):   | station:       "门店" (conf: 0.9)
+I/flutter ( 4914):   | status:        PackageStatus.transit (conf: 0.4)
+I/flutter ( 4914):   | overallConf:   0.72
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【园通速递】您的快仲已到刑台信都绿诚园北门店，取件码——O"
+I/flutter ( 4914):   | fingerprint:   "5f36fc3be108ce8b768c3dd90c90c64c"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【园通速递】您的快仲已到刑台信都绿诚园北门店，取件码7—3—6O07
+I/flutter ( 4914): normalized: 【园通速递】您的快仲已到刑台信都绿诚园北门店，取件码——O
+I/flutter ( 4914): fingerprint: 5f36fc3be108ce8b768c3dd90c90c64c
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TRANSIT + NO PICKUP CODE -> SILENT PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: f0e78a35-7dfe-41d3-a760-cb84830fb542
+I/flutter ( 4914): courier: 圆通速递
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: (empty)
+I/flutter ( 4914): location: 刑台信都绿诚园北门店
+I/flutter ( 4914): status: 运送中
+I/flutter ( 4914): transitFingerprint: 5f36fc3be108ce8b768c3dd90c90c64c
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: f0e78a35-7dfe-41d3-a760-cb84830fb542)
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=圆通速递 tracking="OCR-1778690827896" code= location=刑台信都绿诚园北门店 station=门店 status=运送中 fingerprint=5f36fc3be108ce8b768c3dd90c90c64c
+I/flutter ( 4914): [PackageListNotifier] state before: 3 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): [PackageListNotifier] state.length: 3
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking=OCR-1778690827896
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 4 packages
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: f0e78a35-7dfe-41d3-a760-cb84830fb542, courier: 圆通速递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: f0e78a35-7dfe-41d3-a760-cb84830fb542)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 647b639d-c79f-410a-9b73-f86f3940c716)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 647b639d-c79f-410a-9b73-f86f3940c716, packageId: f0e78a35-7dfe-41d3-a760-cb84830fb542)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 13, package events: 1
+I/flutter ( 4914): [MockImportDialog] ✓ bad_ocr_4.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing sto_arrival.txt (9/20) ===
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【申通快递】您的包裹已到达邢台市桥西区世纪花园南门驿站，请凭取件码5-1-1008取件。
+I/flutter ( 4914):   length: 44
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【申通快递】您的包裹已到达邢台市桥西区世纪花园南门驿站，请凭取件码5-1-1008取件。
+I/flutter ( 4914):   original length: 44
+I/flutter ( 4914):   cleaned length: 44
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [已到达, 驿站, 取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 44
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 申通快递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode: 5-1-1008 (0.95)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location: 裹已到达邢台市桥西区世纪花园南门驿站 (0.9, title_pattern_1)
+I/flutter ( 4914): status: 待取件 (0.9500000000000001, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.9375
+I/flutter ( 4914): isValid: true canCreatePackage: true
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       sto (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "5-1-1008" (conf: 0.95)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "裹已到达邢台市桥西区世纪花园南门驿站" (conf: 0.9)
+I/flutter ( 4914):   | station:       "驿站" (conf: 0.9)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.9500000000000001)
+I/flutter ( 4914):   | overallConf:   0.94
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【申通快递】您的包裹已到达邢台市桥西区世纪花园南门驿站，请凭取件码-取件。"
+I/flutter ( 4914):   | fingerprint:   "50a65af0478188582bdc248eb2a57e2d"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【申通快递】您的包裹已到达邢台市桥西区世纪花园南门驿站，请凭取件码5-1-1008取件。
+I/flutter ( 4914): normalized: 【申通快递】您的包裹已到达邢台市桥西区世纪花园南门驿站，请凭取件码-取件。
+I/flutter ( 4914): fingerprint: 50a65af0478188582bdc248eb2a57e2d
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   HIGH CONFIDENCE -> PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: ef2a320d-4ab0-4c78-821b-28998471bbe9
+I/flutter ( 4914): courier: 申通快递
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: 5-1-1008
+I/flutter ( 4914): location: 裹已到达邢台市桥西区世纪花园南门驿站
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): transitFingerprint: 50a65af0478188582bdc248eb2a57e2d
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: ef2a320d-4ab0-4c78-821b-28998471bbe9)
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=申通快递 tracking="OCR-1778690828006" code=5-1-1008 location=裹已到达邢台市桥西区世纪花园南门驿站 station=驿站 status=待取件 fingerprint=50a65af0478188582bdc248eb2a57e2d
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SHOW ARRIVED NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 申通 5-1-1008
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SCHEDULE REMINDER NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 申通
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+E/flutter ( 4914): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: PlatformException(exact_alarms_not_permitted, Exact alarms are not permitted, null, null)
+E/flutter ( 4914): #0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+E/flutter ( 4914): #1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #2      AndroidFlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/platform_flutter_local_notifications.dart:211:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #3      FlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart:326:7)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #4      NotificationAdapter._scheduleNotification (package:pickup_app/platform/notification/notification_adapter.dart:142:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #5      NotificationAdapter.scheduleReminderNotification (package:pickup_app/platform/notification/notification_adapter.dart:74:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【圆通速递】您的快件已送达，请凭取件码7-3-6007到邢台信都区锦绣鹏程东门店领取。
+I/flutter ( 4914):   length: 43
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【圆通速递】您的快件已送达，请凭取件码7-3-6007到邢台信都区锦绣鹏程东门店领取。
+I/flutter ( 4914):   original length: 43
+I/flutter ( 4914):   cleaned length: 43
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 43
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 圆通速递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode: 7-3-6007 (0.95)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location: 到邢台信都区锦绣鹏程东门店 (0.9, title_pattern_1)
+I/flutter ( 4914): status: 待取件 (0.9, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.9249999999999999
+I/flutter ( 4914): isValid: true canCreatePackage: true
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       yt (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "7-3-6007" (conf: 0.95)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "到邢台信都区锦绣鹏程东门店" (conf: 0.9)
+I/flutter ( 4914):   | station:       "门店" (conf: 0.9)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.9)
+I/flutter ( 4914):   | overallConf:   0.92
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【圆通速递】您的快件已送达，请凭取件码-到邢台信都区锦绣鹏程东门店领取。"
+I/flutter ( 4914):   | fingerprint:   "a631953fec380b3fdd9b549d92777ade"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【圆通速递】您的快件已送达，请凭取件码7-3-6007到邢台信都区锦绣鹏程东门店领取。
+I/flutter ( 4914): normalized: 【圆通速递】您的快件已送达，请凭取件码-到邢台信都区锦绣鹏程东门店领取。
+I/flutter ( 4914): fingerprint: a631953fec380b3fdd9b549d92777ade
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   HIGH CONFIDENCE -> PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e
+I/flutter ( 4914): courier: 圆通速递
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: 7-3-6007
+I/flutter ( 4914): location: 到邢台信都区锦绣鹏程东门店
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): transitFingerprint: a631953fec380b3fdd9b549d92777ade
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SHOW ARRIVED NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 圆通 7-3-6007
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SCHEDULE REMINDER NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 圆通
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+E/flutter ( 4914): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: PlatformException(exact_alarms_not_permitted, Exact alarms are not permitted, null, null)
+E/flutter ( 4914): #0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+E/flutter ( 4914): #1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #2      AndroidFlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/platform_flutter_local_notifications.dart:211:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #3      FlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart:326:7)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #4      NotificationAdapter._scheduleNotification (package:pickup_app/platform/notification/notification_adapter.dart:142:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #5      NotificationAdapter.scheduleReminderNotification (package:pickup_app/platform/notification/notification_adapter.dart:74:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【中通快递】您的快递已到邢台桥东区阳光国际北门快递站，取件码8812，请于24小时内取件。
+I/flutter ( 4914):   length: 45
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【中通快递】您的快递已到邢台桥东区阳光国际北门快递站，取件码8812，请于24小时内取件。
+I/flutter ( 4914):   original length: 45
+I/flutter ( 4914):   cleaned length: 45
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 45
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 中通快递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode: 8812 (0.95)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location: 邢台桥东区阳光国际北门快递站 (0.3, arrival_format)
+I/flutter ( 4914): status: 待取件 (0.8500000000000001, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.7625
+I/flutter ( 4914): isValid: true canCreatePackage: true
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       zto (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "8812" (conf: 0.95)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "邢台桥东区阳光国际北门快递站" (conf: 0.3)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.8500000000000001)
+I/flutter ( 4914):   | overallConf:   0.76
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【中通快递】您的快递已到邢台桥东区阳光国际北门快递站，取件码，请于小时内取件。"
+I/flutter ( 4914):   | fingerprint:   "da7375bf0114df5aaf8fcd87800f4f5e"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【中通快递】您的快递已到邢台桥东区阳光国际北门快递站，取件码8812，请于24小时内取件。
+I/flutter ( 4914): normalized: 【中通快递】您的快递已到邢台桥东区阳光国际北门快递站，取件码，请于小时内取件。
+I/flutter ( 4914): fingerprint: da7375bf0114df5aaf8fcd87800f4f5e
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   HIGH CONFIDENCE -> PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 61798fae-700e-4a96-a559-267d697811af
+I/flutter ( 4914): courier: 中通快递
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: 8812
+I/flutter ( 4914): location: 邢台桥东区阳光国际北门快递站
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): transitFingerprint: da7375bf0114df5aaf8fcd87800f4f5e
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SHOW ARRIVED NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 中通 8812
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SCHEDULE REMINDER NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 中通
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+E/flutter ( 4914): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: PlatformException(exact_alarms_not_permitted, Exact alarms are not permitted, null, null)
+E/flutter ( 4914): #0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+E/flutter ( 4914): #1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #2      AndroidFlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/platform_flutter_local_notifications.dart:211:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #3      FlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart:326:7)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #4      NotificationAdapter._scheduleNotification (package:pickup_app/platform/notification/notification_adapter.dart:142:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #5      NotificationAdapter.scheduleReminderNotification (package:pickup_app/platform/notification/notification_adapter.dart:74:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【京东物流】您的京东订单正在派送中，配送员张师傅，电话13812345678，预计14:00前送达。
+I/flutter ( 4914):   length: 50
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【京东物流】您的京东订单正在派送中，配送员张师傅，电话13812345678，预计14:00前送达。
+I/flutter ( 4914):   original length: 50
+I/flutter ( 4914):   cleaned length: 50
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: false
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 50
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 京东快递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode:  (0.0)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 派送中 (0.9, direct_keyword)
+I/flutter ( 4914): overallConfidence: 0.9166666666666666
+I/flutter ( 4914): isValid: true canCreatePackage: true
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       jd (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "" (conf: 0.0)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.delivering (conf: 0.9)
+I/flutter ( 4914):   | overallConf:   0.92
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【京东物流】您的京东订单正在派送中，配送员张师傅，电话，预计前送达。"
+I/flutter ( 4914):   | fingerprint:   "ea80428641149144400be80dffb3f3bf"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【京东物流】您的京东订单正在派送中，配送员张师傅，电话13812345678，预计14:00前送达。
+I/flutter ( 4914): normalized: 【京东物流】您的京东订单正在派送中，配送员张师傅，电话，预计前送达。
+I/flutter ( 4914): fingerprint: ea80428641149144400be80dffb3f3bf
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TRANSIT + NO PICKUP CODE -> SILENT PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 2d941b79-a80d-4041-a518-0d2b295d5bdd
+I/flutter ( 4914): courier: 京东快递
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: (empty)
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 派送中
+I/flutter ( 4914): transitFingerprint: ea80428641149144400be80dffb3f3bf
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+D/EGL_emulation( 4914): app_time_stats: avg=15.05ms min=1.40ms max=50.73ms count=49
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【顺丰速运】您的快件SF1234567890已到达顺丰速运营业点，请凭有效证件领取。
+I/flutter ( 4914):   length: 42
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【顺丰速运】您的快件SF1234567890已到达顺丰速运营业点，请凭有效证件领取。
+I/flutter ( 4914):   original length: 42
+I/flutter ( 4914):   cleaned length: 42
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [已到达]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 42
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 顺丰速运 (0.95, tracking_prefix)
+I/flutter ( 4914): pickupCode:  (0.0)
+I/flutter ( 4914): trackingNumber: SF1234567890 (0.85)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 运送中 (0.4, default_transit)
+I/flutter ( 4914): overallConfidence: 0.7333333333333333
+I/flutter ( 4914): isValid: true canCreatePackage: false
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914):   warning: 状态识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       sf (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "" (conf: 0.0)
+I/flutter ( 4914):   | trackingNumber: "SF1234567890" (conf: 0.85)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.transit (conf: 0.4)
+I/flutter ( 4914):   | overallConf:   0.73
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【顺丰速运】您的快件SF已到达顺丰速运营业点，请凭有效证件领取。"
+I/flutter ( 4914):   | fingerprint:   "2af6bd02170aa13dc6ba09eb82255a0a"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【顺丰速运】您的快件SF1234567890已到达顺丰速运营业点，请凭有效证件领取。
+I/flutter ( 4914): normalized: 【顺丰速运】您的快件SF已到达顺丰速运营业点，请凭有效证件领取。
+I/flutter ( 4914): fingerprint: 2af6bd02170aa13dc6ba09eb82255a0a
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TRANSIT + NO PICKUP CODE -> SILENT PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 6cc5cb63-042d-4d81-8d59-7f7a2220dcaa
+I/flutter ( 4914): courier: 顺丰速运
+I/flutter ( 4914): trackingNumber: SF1234567890
+I/flutter ( 4914): pickupCode: (empty)
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 运送中
+I/flutter ( 4914): transitFingerprint: 2af6bd02170aa13dc6ba09eb82255a0a
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【拼多多】您在拼多多购买的商品已发货，运单号YT8866295706389，预计3天内送达。
+I/flutter ( 4914):   length: 46
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【拼多多】您在拼多多购买的商品已发货，运单号YT8866295706389，预计3天内送达。
+I/flutter ( 4914):   original length: 46
+I/flutter ( 4914):   cleaned length: 46
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: true
+I/flutter ( 4914): hasArrivalSignals: false
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): transitKeywords: [已发货]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 46
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 圆通速递 (0.95, tracking_prefix)
+I/flutter ( 4914): pickupCode:  (0.0)
+I/flutter ( 4914): trackingNumber: YT8866295706389 (0.95)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 运送中 (0.9, direct_keyword)
+I/flutter ( 4914): overallConfidence: 0.9333333333333332
+I/flutter ( 4914): isValid: true canCreatePackage: true
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       yt (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "" (conf: 0.0)
+I/flutter ( 4914):   | trackingNumber: "YT8866295706389" (conf: 0.95)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.transit (conf: 0.9)
+I/flutter ( 4914):   | overallConf:   0.93
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【拼多多】您在拼多多购买的商品已发货，运单号YT，预计天内送达。"
+I/flutter ( 4914):   | fingerprint:   "b9f6e1db3ffee19f3497054705615954"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【拼多多】您在拼多多购买的商品已发货，运单号YT8866295706389，预计3天内送达。
+I/flutter ( 4914): normalized: 【拼多多】您在拼多多购买的商品已发货，运单号YT，预计天内送达。
+I/flutter ( 4914): fingerprint: b9f6e1db3ffee19f3497054705615954
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TRANSIT + NO PICKUP CODE -> SILENT PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 369722bd-87de-40b4-9e27-470b9aaf3cce
+I/flutter ( 4914): courier: 圆通速递
+I/flutter ( 4914): trackingNumber: YT8866295706389
+I/flutter ( 4914): pickupCode: (empty)
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 运送中
+I/flutter ( 4914): transitFingerprint: b9f6e1db3ffee19f3497054705615954
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【抖音电商】您的订单已发货，物流单号为中通73186452345678，请注意查收。
+I/flutter ( 4914):   length: 42
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【抖音电商】您的订单已发货，物流单号为中通73186452345678，请注意查收。
+I/flutter ( 4914):   original length: 42
+I/flutter ( 4914):   cleaned length: 42
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: true
+I/flutter ( 4914): hasArrivalSignals: false
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): transitKeywords: [已发货]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 42
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 中通快递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode:  (0.0)
+I/flutter ( 4914): trackingNumber: 中通73186452345678 (0.9)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 运送中 (0.9, direct_keyword)
+I/flutter ( 4914): overallConfidence: 0.9166666666666666
+I/flutter ( 4914): isValid: true canCreatePackage: true
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       zto (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "" (conf: 0.0)
+I/flutter ( 4914):   | trackingNumber: "中通73186452345678" (conf: 0.9)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.transit (conf: 0.9)
+I/flutter ( 4914):   | overallConf:   0.92
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【抖音电商】您的订单已发货，物流单号为中通，请注意查收。"
+I/flutter ( 4914):   | fingerprint:   "0e4f3e53290c16596e6bceee5673d0bb"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【抖音电商】您的订单已发货，物流单号为中通73186452345678，请注意查收。
+I/flutter ( 4914): normalized: 【抖音电商】您的订单已发货，物流单号为中通，请注意查收。
+I/flutter ( 4914): fingerprint: 0e4f3e53290c16596e6bceee5673d0bb
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TRANSIT + NO PICKUP CODE -> SILENT PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 7d6faa65-c6c1-4476-b080-5b641ea384b4
+I/flutter ( 4914): courier: 中通快递
+I/flutter ( 4914): trackingNumber: 中通73186452345678
+I/flutter ( 4914): pickupCode: (empty)
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 运送中
+I/flutter ( 4914): transitFingerprint: 0e4f3e53290c16596e6bceee5673d0bb
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【菜鸟驿站】您有2个包裹到达邢台信都区绿城诚园北门店，取件码分别为4431和4432，请及时取件。
+I/flutter ( 4914):   length: 49
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【菜鸟驿站】您有2个包裹到达邢台信都区绿城诚园北门店，取件码分别为4431和4432，请及时取件。
+I/flutter ( 4914):   original length: 49
+I/flutter ( 4914):   cleaned length: 49
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [驿站, 取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 49
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 其他 (0.8, keyword_match)
+I/flutter ( 4914): pickupCode: 4431 (0.8)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location: 到达邢台信都区绿城诚园北门店 (0.9, title_pattern_1)
+I/flutter ( 4914): status: 待取件 (0.8500000000000001, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.8375
+I/flutter ( 4914): isValid: false canCreatePackage: false
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       other (conf: 0.8)
+I/flutter ( 4914):   | pickupCode:    "4431" (conf: 0.8)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "到达邢台信都区绿城诚园北门店" (conf: 0.9)
+I/flutter ( 4914):   | station:       "菜鸟驿站" (conf: 0.9)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.8500000000000001)
+I/flutter ( 4914):   | overallConf:   0.84
+I/flutter ( 4914):   | isValid:       false
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【菜鸟驿站】您有个包裹到达邢台信都区绿城诚园北门店，取件码分别为和，请及时取件。"
+I/flutter ( 4914):   | fingerprint:   "a3085d0e89ff7cdf34518e8de3182ba0"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【菜鸟驿站】您有2个包裹到达邢台信都区绿城诚园北门店，取件码分别为4431和4432，请及时取件。
+I/flutter ( 4914): normalized: 【菜鸟驿站】您有个包裹到达邢台信都区绿城诚园北门店，取件码分别为和，请及时取件。
+I/flutter ( 4914): fingerprint: a3085d0e89ff7cdf34518e8de3182ba0
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   HIGH CONFIDENCE -> PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 5e693ea4-86e4-4816-b320-92974d5a8d8a
+I/flutter ( 4914): courier: 其他
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: 4431
+I/flutter ( 4914): location: 到达邢台信都区绿城诚园北门店
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): transitFingerprint: a3085d0e89ff7cdf34518e8de3182ba0
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   MERGE EXISTING PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   STATUS RESOLUTION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【韵达快递】您的快递出现异常，联系不上收件人，请尽快联系快递员确认收货地址。
+I/flutter ( 4914):   length: 38
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【韵达快递】您的快递出现异常，联系不上收件人，请尽快联系快递员确认收货地址。
+I/flutter ( 4914):   original length: 38
+I/flutter ( 4914):   cleaned length: 38
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: false
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 38
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 韵达快递 (0.95, keyword_match)
+I/flutter ( 4914): pickupCode:  (0.0)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 运送中 (0.4, default_transit)
+I/flutter ( 4914): overallConfidence: 0.675
+I/flutter ( 4914): isValid: true canCreatePackage: false
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914):   warning: 状态识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       yd (conf: 0.95)
+I/flutter ( 4914):   | pickupCode:    "" (conf: 0.0)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.transit (conf: 0.4)
+I/flutter ( 4914):   | overallConf:   0.68
+I/flutter ( 4914):   | isValid:       true
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【韵达快递】您的快递出现异常，联系不上收件人，请尽快联系快递员确认收货地址。"
+I/flutter ( 4914):   | fingerprint:   "0c5f9a49538ff9aa1fca586e1b74ec51"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【韵达快递】您的快递出现异常，联系不上收件人，请尽快联系快递员确认收货地址。
+I/flutter ( 4914): normalized: 【韵达快递】您的快递出现异常，联系不上收件人，请尽快联系快递员确认收货地址。
+I/flutter ( 4914): fingerprint: 0c5f9a49538ff9aa1fca586e1b74ec51
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TRANSIT + NO PICKUP CODE -> SILENT PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 19f0a058-1936-4653-b371-a5b9960533c5
+I/flutter ( 4914): courier: 韵达快递
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: (empty)
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 运送中
+I/flutter ( 4914): transitFingerprint: 0c5f9a49538ff9aa1fca586e1b74ec51
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 取件码5566，请到小区西门快递点取件
+I/flutter ( 4914):   length: 19
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 取件码5566，请到小区西门快递点取件
+I/flutter ( 4914):   original length: 19
+I/flutter ( 4914):   cleaned length: 19
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 19
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 其他 (0.0, no_match)
+I/flutter ( 4914): pickupCode: 5566 (0.95)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 待取件 (0.8, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.875
+I/flutter ( 4914): isValid: false canCreatePackage: false
+I/flutter ( 4914):   warning: 快递公司识别置信度较低
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       other (conf: 0.0)
+I/flutter ( 4914):   | pickupCode:    "5566" (conf: 0.95)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.8)
+I/flutter ( 4914):   | overallConf:   0.88
+I/flutter ( 4914):   | isValid:       false
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "取件码，请到小区西门快递点取件"
+I/flutter ( 4914):   | fingerprint:   "53060a0d186737adf2a75469e58e1030"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 取件码5566，请到小区西门快递点取件
+I/flutter ( 4914): normalized: 取件码，请到小区西门快递点取件
+I/flutter ( 4914): fingerprint: 53060a0d186737adf2a75469e58e1030
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ARRIVED + INCOMPLETE INFO -> PENDING CONFIRMATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PENDING CONFIRMATION CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 6a2f2a10-29c5-46db-a787-bfd549617c48
+I/flutter ( 4914): confidence: 0.875
+I/flutter ( 4914): courier: 其他
+I/flutter ( 4914): pickupCode: 5566
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): [PackageListNotifier] state before: 4 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 4
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] Dedupe by pickupCode: 5-1-1008
+I/flutter ( 4914): [PackageListNotifier] → miss
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking=OCR-1778690828006
+I/flutter ( 4914): [PackageListNotifier] arrived, triggering notification
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 5 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: ef2a320d-4ab0-4c78-821b-28998471bbe9, courier: 申通快递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: ef2a320d-4ab0-4c78-821b-28998471bbe9)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 0713adea-c63c-41bc-9ba5-728d736574de)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 0713adea-c63c-41bc-9ba5-728d736574de, packageId: ef2a320d-4ab0-4c78-821b-28998471bbe9)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 14, package events: 1
+I/flutter ( 4914): [EventAggregator] createPickupCodeEvent called (packageId: ef2a320d-4ab0-4c78-821b-28998471bbe9, pickupCode: 5-1-1008)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.pickupCodeGenerated, source: mock, packageId: ef2a320d-4ab0-4c78-821b-28998471bbe9)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.pickupCodeGenerated (id: 132fd82a-b29b-4b8e-a0cd-1d3590e13f25)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 132fd82a-b29b-4b8e-a0cd-1d3590e13f25, packageId: ef2a320d-4ab0-4c78-821b-28998471bbe9)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 15, package events: 2
+I/flutter ( 4914): [MockImportDialog] ✓ sto_arrival.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing yt_arrival.txt (10/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=圆通速递 tracking="OCR-1778690828117" code=7-3-6007 location=到邢台信都区锦绣鹏程东门店 station=门店 status=待取件 fingerprint=a631953fec380b3fdd9b549d92777ade
+I/flutter ( 4914): [PackageListNotifier] state before: 5 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 5
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier] Dedupe by pickupCode: 7-3-6007
+I/flutter ( 4914): [PackageListNotifier] → miss
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking=OCR-1778690828117
+I/flutter ( 4914): [PackageListNotifier] arrived, triggering notification
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 6 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e, courier: 圆通速递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: df6d16db-ee18-436d-95f8-9a3307d2b879)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: df6d16db-ee18-436d-95f8-9a3307d2b879, packageId: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 16, package events: 1
+I/flutter ( 4914): [EventAggregator] createPickupCodeEvent called (packageId: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e, pickupCode: 7-3-6007)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.pickupCodeGenerated, source: mock, packageId: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.pickupCodeGenerated (id: a77865dc-c175-43eb-9b47-264798972987)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: a77865dc-c175-43eb-9b47-264798972987, packageId: 3a9c46b8-c2ec-4eed-adc4-5f12d597680e)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 17, package events: 2
+I/flutter ( 4914): [MockImportDialog] ✓ yt_arrival.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing zto_arrival.txt (11/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 61798fae-700e-4a96-a559-267d697811af)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=中通快递 tracking="OCR-1778690828227" code=8812 location=邢台桥东区阳光国际北门快递站 station= status=待取件 fingerprint=da7375bf0114df5aaf8fcd87800f4f5e
+I/flutter ( 4914): [PackageListNotifier] state before: 6 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 6
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier] Dedupe by pickupCode: 8812
+I/flutter ( 4914): [PackageListNotifier] → miss
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=61798fae-700e-4a96-a559-267d697811af tracking=OCR-1778690828227
+I/flutter ( 4914): [PackageListNotifier] arrived, triggering notification
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 7 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 61798fae-700e-4a96-a559-267d697811af, courier: 中通快递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 61798fae-700e-4a96-a559-267d697811af)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: a7e1d9ff-74d2-4d42-ac3f-c5dbba749404)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: a7e1d9ff-74d2-4d42-ac3f-c5dbba749404, packageId: 61798fae-700e-4a96-a559-267d697811af)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 18, package events: 1
+I/flutter ( 4914): [EventAggregator] createPickupCodeEvent called (packageId: 61798fae-700e-4a96-a559-267d697811af, pickupCode: 8812)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.pickupCodeGenerated, source: mock, packageId: 61798fae-700e-4a96-a559-267d697811af)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.pickupCodeGenerated (id: 9574e782-e9bf-4908-bef2-e8e6f25bfd98)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 9574e782-e9bf-4908-bef2-e8e6f25bfd98, packageId: 61798fae-700e-4a96-a559-267d697811af)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 19, package events: 2
+I/flutter ( 4914): [MockImportDialog] ✓ zto_arrival.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing jd_delivering.txt (12/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 2d941b79-a80d-4041-a518-0d2b295d5bdd)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=京东快递 tracking="OCR-1778690828339" code= location= station= status=派送中 fingerprint=ea80428641149144400be80dffb3f3bf
+I/flutter ( 4914): [PackageListNotifier] state before: 7 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 7
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking=OCR-1778690828339
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 8 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 2d941b79-a80d-4041-a518-0d2b295d5bdd, courier: 京东快递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 2d941b79-a80d-4041-a518-0d2b295d5bdd)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: b493209f-1295-40b6-bc5a-e2da0570b432)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: b493209f-1295-40b6-bc5a-e2da0570b432, packageId: 2d941b79-a80d-4041-a518-0d2b295d5bdd)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 20, package events: 1
+I/flutter ( 4914): [MockImportDialog] ✓ jd_delivering.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing sf_pickup.txt (13/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 6cc5cb63-042d-4d81-8d59-7f7a2220dcaa)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=顺丰速运 tracking="SF1234567890" code= location= station= status=运送中 fingerprint=2af6bd02170aa13dc6ba09eb82255a0a
+I/flutter ( 4914): [PackageListNotifier] state before: 8 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 8
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [7] id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking="OCR-1778690828339" code= status=派送中
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=6cc5cb63-042d-4d81-8d59-7f7a2220dcaa tracking=SF1234567890
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 9 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 6cc5cb63-042d-4d81-8d59-7f7a2220dcaa, courier: 顺丰速运)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 6cc5cb63-042d-4d81-8d59-7f7a2220dcaa)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 01f4d3e5-c351-4f93-8b65-6a1905bf0e45)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 01f4d3e5-c351-4f93-8b65-6a1905bf0e45, packageId: 6cc5cb63-042d-4d81-8d59-7f7a2220dcaa)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 21, package events: 1
+I/flutter ( 4914): [MockImportDialog] ✓ sf_pickup.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing pdd_arrival.txt (14/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 369722bd-87de-40b4-9e27-470b9aaf3cce)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=圆通速递 tracking="YT8866295706389" code= location= station= status=运送中 fingerprint=b9f6e1db3ffee19f3497054705615954
+I/flutter ( 4914): [PackageListNotifier] state before: 9 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 取件码：8812
+I/flutter ( 4914):   length: 8
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 取件码：8812
+I/flutter ( 4914):   original length: 8
+I/flutter ( 4914):   cleaned length: 8
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 8
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 其他 (0.0, no_match)
+I/flutter ( 4914): pickupCode: 8812 (0.95)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location:  (0.0, no_match)
+I/flutter ( 4914): status: 待取件 (0.8, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.875
+I/flutter ( 4914): isValid: false canCreatePackage: false
+I/flutter ( 4914):   warning: 快递公司识别置信度较低
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914):   warning: 取货地点识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       other (conf: 0.0)
+I/flutter ( 4914):   | pickupCode:    "8812" (conf: 0.95)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "" (conf: 0.0)
+I/flutter ( 4914):   | station:       "" (conf: 0.0)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.8)
+I/flutter ( 4914):   | overallConf:   0.88
+I/flutter ( 4914):   | isValid:       false
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "取件码："
+I/flutter ( 4914):   | fingerprint:   "null"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 取件码：8812
+I/flutter ( 4914): normalized: 取件码：
+I/flutter ( 4914): fingerprint: (null)
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ARRIVED + INCOMPLETE INFO -> PENDING CONFIRMATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PENDING CONFIRMATION CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 5c638ae6-461a-41b1-85c4-3e9cd5427403
+I/flutter ( 4914): confidence: 0.875
+I/flutter ( 4914): courier: 其他
+I/flutter ( 4914): pickupCode: 8812
+I/flutter ( 4914): location: (empty)
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   TEXT SANITIZATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 1] RAW TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【丰巢】您的快递已存入丰巢柜，请凭取件码A2-2301到邢台市信都区绿城诚园北门店丰巢柜取件。
+I/flutter ( 4914):   length: 47
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 2] SANITIZED TEXT
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 【丰巢】您的快递已存入丰巢柜，请凭取件码A2-2301到邢台市信都区绿城诚园北门店丰巢柜取件。
+I/flutter ( 4914):   original length: 47
+I/flutter ( 4914):   cleaned length: 47
+I/flutter ( 4914):   keptLines: 1
+I/flutter ( 4914):   removedLines: 0
+I/flutter ( 4914): 
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CONFLICT ANALYSIS
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): hasTransitSignals: false
+I/flutter ( 4914): hasArrivalSignals: true
+I/flutter ( 4914): conflictLevel: ParseConflictLevel.none
+I/flutter ( 4914): arrivalKeywords: [丰巢, 取件码]
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): sanitizedText length: 47
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSING COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): parseResults count: 1
+I/flutter ( 4914): 
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914):   [LAYER 3] PARSE RESULTS
+I/flutter ( 4914): ===============================================
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PARSE RESULT #0
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): courier: 其他 (0.0, no_match)
+I/flutter ( 4914): pickupCode: A2-2301 (0.95)
+I/flutter ( 4914): trackingNumber:  (0.0)
+I/flutter ( 4914): location: 到邢台市信都区绿城诚园北门店 (0.9, title_pattern_1)
+I/flutter ( 4914): status: 待取件 (0.8500000000000001, multi_signal_arrived)
+I/flutter ( 4914): overallConfidence: 0.9
+I/flutter ( 4914): isValid: false canCreatePackage: false
+I/flutter ( 4914):   warning: 快递公司识别置信度较低
+I/flutter ( 4914):   warning: 运单号识别置信度较低
+I/flutter ( 4914): 
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | 0
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | courier:       other (conf: 0.0)
+I/flutter ( 4914):   | pickupCode:    "A2-2301" (conf: 0.95)
+I/flutter ( 4914):   | trackingNumber: "" (conf: 0.0)
+I/flutter ( 4914):   | location:      "到邢台市信都区绿城诚园北门店" (conf: 0.9)
+I/flutter ( 4914):   | station:       "丰巢" (conf: 0.9)
+I/flutter ( 4914):   | status:        PackageStatus.arrived (conf: 0.8500000000000001)
+I/flutter ( 4914):   | overallConf:   0.90
+I/flutter ( 4914):   | isValid:       false
+I/flutter ( 4914):   +-----------------------------------------
+I/flutter ( 4914):   | normalized:    "【丰巢】您的快递已存入丰巢柜，请凭取件码A到邢台市信都区绿城诚园北门店丰巢柜取件。"
+I/flutter ( 4914):   | fingerprint:   "62f4241b4bae2734af6fa53dd3a12caa"
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   NORMALIZED TEXT
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): original: 【丰巢】您的快递已存入丰巢柜，请凭取件码A2-2301到邢台市信都区绿城诚园北门店丰巢柜取件。
+I/flutter ( 4914): normalized: 【丰巢】您的快递已存入丰巢柜，请凭取件码A到邢台市信都区绿城诚园北门店丰巢柜取件。
+I/flutter ( 4914): fingerprint: 62f4241b4bae2734af6fa53dd3a12caa
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   HIGH CONFIDENCE -> PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   PACKAGE CREATED
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): id: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b
+I/flutter ( 4914): courier: 其他
+I/flutter ( 4914): trackingNumber: 
+I/flutter ( 4914): pickupCode: A2-2301
+I/flutter ( 4914): location: 到邢台市信都区绿城诚园北门店
+I/flutter ( 4914): status: 待取件
+I/flutter ( 4914): transitFingerprint: 62f4241b4bae2734af6fa53dd3a12caa
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE START
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   DEDUPE CHECK
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   CREATE NEW PACKAGE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SHOW ARRIVED NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 其他 A2-2301
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   SCHEDULE REMINDER NOTIFICATION
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914): package: 其他
+I/flutter ( 4914): 
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+I/flutter ( 4914):   ADD PACKAGE COMPLETE
+I/flutter ( 4914): ═══════════════════════════════════════════════════
+E/flutter ( 4914): [ERROR:flutter/runtime/dart_vm_initializer.cc(40)] Unhandled Exception: PlatformException(exact_alarms_not_permitted, Exact alarms are not permitted, null, null)
+E/flutter ( 4914): #0      StandardMethodCodec.decodeEnvelope (package:flutter/src/services/message_codecs.dart:653:7)
+E/flutter ( 4914): #1      MethodChannel._invokeMethod (package:flutter/src/services/platform_channel.dart:366:18)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #2      AndroidFlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/platform_flutter_local_notifications.dart:211:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #3      FlutterLocalNotificationsPlugin.zonedSchedule (package:flutter_local_notifications/src/flutter_local_notifications_plugin.dart:326:7)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #4      NotificationAdapter._scheduleNotification (package:pickup_app/platform/notification/notification_adapter.dart:142:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): #5      NotificationAdapter.scheduleReminderNotification (package:pickup_app/platform/notification/notification_adapter.dart:74:5)
+E/flutter ( 4914): <asynchronous suspension>
+E/flutter ( 4914): 
+D/EGL_emulation( 4914): app_time_stats: avg=20.80ms min=1.62ms max=96.27ms count=45
+I/flutter ( 4914): [PackageListNotifier] state.length: 9
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [7] id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking="OCR-1778690828339" code= status=派送中
+I/flutter ( 4914): [PackageListNotifier]   [8] id=6cc5cb63-042d-4d81-8d59-7f7a2220dcaa tracking="SF1234567890" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=369722bd-87de-40b4-9e27-470b9aaf3cce tracking=YT8866295706389
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 10 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 369722bd-87de-40b4-9e27-470b9aaf3cce, courier: 圆通速递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 369722bd-87de-40b4-9e27-470b9aaf3cce)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 7e10dfd2-8190-47ce-a044-6947330ddd5f)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 7e10dfd2-8190-47ce-a044-6947330ddd5f, packageId: 369722bd-87de-40b4-9e27-470b9aaf3cce)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 22, package events: 1
+I/flutter ( 4914): [MockImportDialog] ✓ pdd_arrival.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing douyin_arrival.txt (15/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 7d6faa65-c6c1-4476-b080-5b641ea384b4)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=中通快递 tracking="中通73186452345678" code= location= station= status=运送中 fingerprint=0e4f3e53290c16596e6bceee5673d0bb
+I/flutter ( 4914): [PackageListNotifier] state before: 10 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 10
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [7] id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking="OCR-1778690828339" code= status=派送中
+I/flutter ( 4914): [PackageListNotifier]   [8] id=6cc5cb63-042d-4d81-8d59-7f7a2220dcaa tracking="SF1234567890" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [9] id=369722bd-87de-40b4-9e27-470b9aaf3cce tracking="YT8866295706389" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=7d6faa65-c6c1-4476-b080-5b641ea384b4 tracking=中通73186452345678
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 11 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 7d6faa65-c6c1-4476-b080-5b641ea384b4, courier: 中通快递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 7d6faa65-c6c1-4476-b080-5b641ea384b4)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: c55fcb7a-76ee-4d5d-9c5a-166545134d4d)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: c55fcb7a-76ee-4d5d-9c5a-166545134d4d, packageId: 7d6faa65-c6c1-4476-b080-5b641ea384b4)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 23, package events: 1
+I/flutter ( 4914): [MockImportDialog] ✓ douyin_arrival.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing multi_package.txt (16/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 5e693ea4-86e4-4816-b320-92974d5a8d8a)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=其他 tracking="OCR-1778690828762" code=4431 location=到达邢台信都区绿城诚园北门店 station=菜鸟驿站 status=待取件 fingerprint=a3085d0e89ff7cdf34518e8de3182ba0
+I/flutter ( 4914): [PackageListNotifier] state before: 11 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 11
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [7] id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking="OCR-1778690828339" code= status=派送中
+I/flutter ( 4914): [PackageListNotifier]   [8] id=6cc5cb63-042d-4d81-8d59-7f7a2220dcaa tracking="SF1234567890" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [9] id=369722bd-87de-40b4-9e27-470b9aaf3cce tracking="YT8866295706389" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [10] id=7d6faa65-c6c1-4476-b080-5b641ea384b4 tracking="中通73186452345678" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] Dedupe by pickupCode: 4431
+I/flutter ( 4914): [PackageListNotifier] → HIT: index=0 id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c (pickupCode match)
+I/flutter ( 4914): [PackageListNotifier] existing package found! Merging (id: 7dc79b6d-a01d-41b1-bfd2-8822d223f65c)
+I/flutter ( 4914): [PackageListNotifier] existing: id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking=OCR-1778690827093 status=待取件 notifiedArrived=true
+I/flutter ( 4914): [PackageListNotifier] existing=待取件(2) incoming=待取件(2)
+I/flutter ( 4914): [PackageListNotifier] resolved=待取件
+I/flutter ( 4914): [PackageListNotifier] merged: status=待取件 urgency=明后天 location=到达邢台信都区绿城诚园北门店
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 11 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 5e693ea4-86e4-4816-b320-92974d5a8d8a, courier: 其他)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 5e693ea4-86e4-4816-b320-92974d5a8d8a)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 638f4984-9e3b-4483-98fb-f9ee55786549)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 638f4984-9e3b-4483-98fb-f9ee55786549, packageId: 5e693ea4-86e4-4816-b320-92974d5a8d8a)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 24, package events: 1
+I/flutter ( 4914): [EventAggregator] createPickupCodeEvent called (packageId: 5e693ea4-86e4-4816-b320-92974d5a8d8a, pickupCode: 4431)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.pickupCodeGenerated, source: mock, packageId: 5e693ea4-86e4-4816-b320-92974d5a8d8a)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.pickupCodeGenerated (id: 38bff566-8f17-463e-945d-1c8211e6976d)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 38bff566-8f17-463e-945d-1c8211e6976d, packageId: 5e693ea4-86e4-4816-b320-92974d5a8d8a)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 25, package events: 2
+I/flutter ( 4914): [MockImportDialog] ✓ multi_package.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing exception.txt (17/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 19f0a058-1936-4653-b371-a5b9960533c5)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=韵达快递 tracking="OCR-1778690828873" code= location= station= status=运送中 fingerprint=0c5f9a49538ff9aa1fca586e1b74ec51
+I/flutter ( 4914): [PackageListNotifier] state before: 11 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 11
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [7] id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking="OCR-1778690828339" code= status=派送中
+I/flutter ( 4914): [PackageListNotifier]   [8] id=6cc5cb63-042d-4d81-8d59-7f7a2220dcaa tracking="SF1234567890" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [9] id=369722bd-87de-40b4-9e27-470b9aaf3cce tracking="YT8866295706389" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [10] id=7d6faa65-c6c1-4476-b080-5b641ea384b4 tracking="中通73186452345678" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=19f0a058-1936-4653-b371-a5b9960533c5 tracking=OCR-1778690828873
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 12 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 19f0a058-1936-4653-b371-a5b9960533c5, courier: 韵达快递)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 19f0a058-1936-4653-b371-a5b9960533c5)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 915807c5-07a6-4f7d-b43e-51f68e5640ba)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 915807c5-07a6-4f7d-b43e-51f68e5640ba, packageId: 19f0a058-1936-4653-b371-a5b9960533c5)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 26, package events: 1
+I/flutter ( 4914): [MockImportDialog] ✓ exception.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing partial_info.txt (18/20) ===
+I/flutter ( 4914): [MockImportDialog] ✓ partial_info.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing code_only.txt (19/20) ===
+I/flutter ( 4914): [MockImportDialog] ✓ code_only.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Testing complex_code.txt (20/20) ===
+I/flutter ( 4914): [PackageListNotifier] addPackage called (id: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b)
+I/flutter ( 4914): [PackageListNotifier] incoming: courier=其他 tracking="OCR-1778690829191" code=A2-2301 location=到邢台市信都区绿城诚园北门店 station=丰巢 status=待取件 fingerprint=62f4241b4bae2734af6fa53dd3a12caa
+I/flutter ( 4914): [PackageListNotifier] state before: 12 packages
+I/flutter ( 4914): [PackageListNotifier] _findExistingPackage called
+I/flutter ( 4914): [PackageListNotifier] state.length: 12
+I/flutter ( 4914): [PackageListNotifier]   [0] id=7dc79b6d-a01d-41b1-bfd2-8822d223f65c tracking="OCR-1778690827093" code=4431 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [1] id=d068a7a0-e72f-4341-833f-0abacf763c28 tracking="OCR-1778690827335" code= status=已取件
+I/flutter ( 4914): [PackageListNotifier]   [2] id=4e13687d-3c70-4003-a64c-af3a32688d57 tracking="OCR-1778690827451" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [3] id=f0e78a35-7dfe-41d3-a760-cb84830fb542 tracking="OCR-1778690827896" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [4] id=ef2a320d-4ab0-4c78-821b-28998471bbe9 tracking="OCR-1778690828006" code=5-1-1008 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [5] id=3a9c46b8-c2ec-4eed-adc4-5f12d597680e tracking="OCR-1778690828117" code=7-3-6007 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [6] id=61798fae-700e-4a96-a559-267d697811af tracking="OCR-1778690828227" code=8812 status=待取件
+I/flutter ( 4914): [PackageListNotifier]   [7] id=2d941b79-a80d-4041-a518-0d2b295d5bdd tracking="OCR-1778690828339" code= status=派送中
+I/flutter ( 4914): [PackageListNotifier]   [8] id=6cc5cb63-042d-4d81-8d59-7f7a2220dcaa tracking="SF1234567890" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [9] id=369722bd-87de-40b4-9e27-470b9aaf3cce tracking="YT8866295706389" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [10] id=7d6faa65-c6c1-4476-b080-5b641ea384b4 tracking="中通73186452345678" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier]   [11] id=19f0a058-1936-4653-b371-a5b9960533c5 tracking="OCR-1778690828873" code= status=运送中
+I/flutter ( 4914): [PackageListNotifier] Dedupe by pickupCode: A2-2301
+I/flutter ( 4914): [PackageListNotifier] → miss
+I/flutter ( 4914): [PackageListNotifier] → NO MATCH (no pickupCode or no existing match)
+I/flutter ( 4914): [PackageListNotifier] no existing package found, creating new
+I/flutter ( 4914): [PackageListNotifier] new: id=5ea5838d-6c96-46c5-86d1-92d5d252aa3b tracking=OCR-1778690829191
+I/flutter ( 4914): [PackageListNotifier] arrived, triggering notification
+I/flutter ( 4914): [PackageListNotifier] addPackage completed. Final state: 13 packages
+I/flutter ( 4914): [EventAggregator] createPackageCreatedEvent called (packageId: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b, courier: 其他)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.packageCreated, source: mock, packageId: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.packageCreated (id: 07ba9dde-0f70-4fc5-a3fb-0ba3dfbd3179)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: 07ba9dde-0f70-4fc5-a3fb-0ba3dfbd3179, packageId: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 27, package events: 1
+I/flutter ( 4914): [EventAggregator] createPickupCodeEvent called (packageId: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b, pickupCode: A2-2301)
+I/flutter ( 4914): [EventAggregator] createEvent called (type: LogisticsEventType.pickupCodeGenerated, source: mock, packageId: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b)
+I/flutter ( 4914): [EventAggregator] event created: LogisticsEventType.pickupCodeGenerated (id: e3c55dd7-1395-4d88-9aca-7d3a15fe2320)
+I/flutter ( 4914): [EventAggregator] _addEvent called (id: e3c55dd7-1395-4d88-9aca-7d3a15fe2320, packageId: 5ea5838d-6c96-46c5-86d1-92d5d252aa3b)
+I/flutter ( 4914): [EventAggregator] event added. Total events: 28, package events: 2
+I/flutter ( 4914): [MockImportDialog] ✓ complex_code.txt: 1 packages
+I/flutter ( 4914): [MockImportDialog] === Test completed ===
+I/flutter ( 4914): [MockImportDialog] Success: 20, Failed: 0
+D/EGL_emulation( 4914): app_time_stats: avg=185.13ms min=2.38ms max=3388.22ms count=19
+

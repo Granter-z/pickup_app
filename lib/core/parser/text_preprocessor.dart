@@ -50,6 +50,27 @@ class TextPreprocessor {
   static String preprocess(String text) {
     var cleaned = text;
     
+    // 统一特殊字符标准化（中文标点、符号
+    // 把中文横杠 替换为普通横杠
+    cleaned = cleaned.replaceAll('—', '-');
+    cleaned = cleaned.replaceAll('－', '-');
+    
+    // 全角转半角
+    cleaned = cleaned.replaceAll('０', '0');
+    cleaned = cleaned.replaceAll('１', '1');
+    cleaned = cleaned.replaceAll('２', '2');
+    cleaned = cleaned.replaceAll('３', '3');
+    cleaned = cleaned.replaceAll('４', '4');
+    cleaned = cleaned.replaceAll('５', '5');
+    cleaned = cleaned.replaceAll('６', '6');
+    cleaned = cleaned.replaceAll('７', '7');
+    cleaned = cleaned.replaceAll('８', '8');
+    cleaned = cleaned.replaceAll('９', '9');
+    cleaned = cleaned.replaceAll('：', ':');
+    cleaned = cleaned.replaceAll('：', ':');
+    cleaned = cleaned.replaceAll('【', '[');
+    cleaned = cleaned.replaceAll('】', ']');
+    
     // OCR错字修正
     for (final entry in _ocrTypoMap.entries) {
       cleaned = cleaned.replaceAll(entry.key, entry.value);

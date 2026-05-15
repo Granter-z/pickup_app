@@ -25,6 +25,7 @@ class HivePackage {
   final CourierType courier;
   final String pickupCode;
   final String location;
+  final String originalStation;
   final String description;
   final UrgencyLevel urgency;
   final PackageStatus status;
@@ -33,13 +34,15 @@ class HivePackage {
   final bool notifiedArrived;
   final DateTime? archivedAt;
   final String? transitFingerprint;  // transit 阶段的弱身份标识
+  final String fingerprint;  // 包裹唯一识别指纹
 
-  const HivePackage({
+  HivePackage({
     required this.id,
     required this.trackingNumber,
     required this.courier,
     this.pickupCode = '',
     this.location = '',
+    this.originalStation = '',
     this.description = '',
     required this.urgency,
     required this.status,
@@ -48,7 +51,8 @@ class HivePackage {
     this.notifiedArrived = false,
     this.archivedAt,
     this.transitFingerprint,
-  });
+    String? fingerprint,
+  }) : this.fingerprint = fingerprint ?? Package.buildFingerprintStatic(pickupCode, courier);
 
   /// 从核心模型创建
   factory HivePackage.fromPackage(Package package) {
@@ -58,6 +62,7 @@ class HivePackage {
       courier: package.courier,
       pickupCode: package.pickupCode,
       location: package.location,
+      originalStation: package.originalStation,
       description: package.description,
       urgency: package.urgency,
       status: package.status,
@@ -66,6 +71,7 @@ class HivePackage {
       notifiedArrived: package.notifiedArrived,
       archivedAt: package.archivedAt,
       transitFingerprint: package.transitFingerprint,
+      fingerprint: package.fingerprint,
     );
   }
 
@@ -77,6 +83,7 @@ class HivePackage {
       courier: courier,
       pickupCode: pickupCode,
       location: location,
+      originalStation: originalStation,
       description: description,
       urgency: urgency,
       status: status,
@@ -85,6 +92,7 @@ class HivePackage {
       notifiedArrived: notifiedArrived,
       archivedAt: archivedAt,
       transitFingerprint: transitFingerprint,
+      fingerprint: fingerprint,
     );
   }
 
@@ -94,6 +102,7 @@ class HivePackage {
     CourierType? courier,
     String? pickupCode,
     String? location,
+    String? originalStation,
     String? description,
     UrgencyLevel? urgency,
     PackageStatus? status,
@@ -102,6 +111,7 @@ class HivePackage {
     bool? notifiedArrived,
     DateTime? archivedAt,
     String? transitFingerprint,
+    String? fingerprint,
   }) {
     return HivePackage(
       id: id ?? this.id,
@@ -109,6 +119,7 @@ class HivePackage {
       courier: courier ?? this.courier,
       pickupCode: pickupCode ?? this.pickupCode,
       location: location ?? this.location,
+      originalStation: originalStation ?? this.originalStation,
       description: description ?? this.description,
       urgency: urgency ?? this.urgency,
       status: status ?? this.status,
@@ -117,6 +128,7 @@ class HivePackage {
       notifiedArrived: notifiedArrived ?? this.notifiedArrived,
       archivedAt: archivedAt ?? this.archivedAt,
       transitFingerprint: transitFingerprint ?? this.transitFingerprint,
+      fingerprint: fingerprint ?? this.fingerprint,
     );
   }
 }

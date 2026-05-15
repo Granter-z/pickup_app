@@ -37,17 +37,17 @@ class RegexPatterns {
 
   /// 带标签的取件码
   static final labeledPickupCode = RegExp(
-    r'(?:取件码|取货码|提取码|验证码)[：:\s]*([A-Za-z0-9\-]{2,20})',
+    r'(?:取件码|取货码|提取码|验证码|凭码|收件码)[：:\s]*([A-Za-z0-9\-—－]{2,20})',
   );
   
   /// 短格式取件码
   static final shortPickupCode = RegExp(
-    r'码[：:\s]*([A-Za-z0-9\-]{2,20})',
+    r'码[：:\s]*([A-Za-z0-9\-—－]{2,20})',
   );
   
   /// Bay格式取件码
   static final bayFormatCode = RegExp(
-    r'\b(\d{1,2})-(\d{1,2})-(\d{2,4})\b',
+    r'\b(\d{1,2})[\-—－](\d{1,2})[\-—－](\d{2,4})\b',
   );
   
   /// 纯数字取件码（4-8位）
@@ -88,7 +88,12 @@ class RegexPatterns {
   
   /// 快递公司+运单号（保留完整格式含前缀）
   static final courierTrackingNumber = RegExp(
-    r'((?:中通速递|圆通速递|申通快递|韵达快递|极兔速递|顺丰速运)\s*(?:[A-Za-z]{2})?\d{8,25})',
+    r'((?:中通速递|中通快递|中通|圆通速递|圆通|申通快递|申通|韵达快递|韵达|极兔速递|极兔|顺丰速运|顺丰)\s*(?:[A-Za-z]{2})?\d{8,25})',
+  );
+
+  /// 宽松的快递公司+运单号（短名称 + 运单号，如"申通777407042267539"）
+  static final looseCourierTrackingNumber = RegExp(
+    r'((?:中通|圆通|申通|韵达|极兔|顺丰|京东|EMS|邮政|德邦|百世)\s*\d{8,25})',
   );
 
   /// 极兔运单号 (JT开头)

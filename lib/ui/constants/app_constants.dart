@@ -16,6 +16,9 @@ class AppColors {
   static const urgentBg = Color(0xFFFFF0EF);
   static const warningBg = Color(0xFFFFF8EF);
   static const successBg = Color(0xFFEFFAF0);
+  static const border = Color(0xFFE5E5EA);
+  static const info = Color(0xFF007AFF);
+  static const error = Color(0xFFFF3B30);
 }
 
 class AppSpacing {

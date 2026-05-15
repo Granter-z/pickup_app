@@ -35,6 +35,13 @@ class CourierExtractor {
     var maxLen = 0;
     bool isSpecific = false;
 
+    // 优先级0：先检查运单号前缀！（SF, YT, ZTO, JD, JT 等！）
+    // 先从运单号前缀匹配！
+    final trackingMatch = _extractByTrackingPrefix(text);
+    if (trackingMatch != null) {
+      return trackingMatch;
+    }
+
     // 按 key 长度降序，确保长别名优先匹配
     final sorted = CourierDictionary.platformAliases.entries.toList()
       ..sort((a, b) => b.key.length.compareTo(a.key.length));
@@ -67,6 +74,47 @@ class CourierExtractor {
       source: 'keyword_match',
     );
   }
+
+  /// 通过运单号前缀提取快递商
+  static ExtractionResult<CourierType>? _extractByTrackingPrefix(String text) {
+    // 检查运单号前缀（SF, YT, ZTO, JT, JD 等
+    if (RegexPatterns.sfTracking.hasMatch(text)) {
+      return ExtractionResult(
+        value: CourierType.sf,
+        confidence: 0.92,
+        source: 'tracking_prefix_sf',
+      );
+    }
+    if (RegexPatterns.ytTracking.hasMatch(text) || RegexPatterns.yt88Tracking.hasMatch(text)) {
+      return ExtractionResult(
+        value: CourierType.yt,
+        confidence: 0.92,
+        source: 'tracking_prefix_yt',
+      );
+    }
+    if (RegexPatterns.ztoTracking.hasMatch(text)) {
+      return ExtractionResult(
+        value: CourierType.zto,
+        confidence: 0.92,
+        source: 'tracking_prefix_zto',
+      );
+    }
+    if (RegexPatterns.jtTracking.hasMatch(text)) {
+      return ExtractionResult(
+        value: CourierType.jt,
+        confidence: 0.92,
+        source: 'tracking_prefix_jt',
+      );
+    }
+    if (RegexPatterns.jdTracking.hasMatch(text)) {
+      return ExtractionResult(
+        value: CourierType.jd,
+        confidence: 0.92,
+        source: 'tracking_prefix_jd',
+      );
+    }
+    return null;
+  }
 }
 
 /// 取件码提取器
@@ -78,6 +126,26 @@ class PickupCodeExtractor {
     // 禁止纯字母开头（2个或更多字母）
     if (RegExp(r'^[a-zA-Z]{2,}').hasMatch(code)) return false;
     return true;
+  }
+
+  /// 规范化取件码：合并连续横杠、去除首尾横杠、修正 OCR 误识别
+  static String _normalizePickupCode(String code) {
+    var normalized = code;
+    // 中文横杠转普通横杠
+    normalized = normalized.replaceAll('—', '-');
+    normalized = normalized.replaceAll('－', '-');
+    
+    // 修正 OCR 字母转数字误识别：O → 0，o → 0，I → 1，l → 1
+    normalized = normalized.replaceAll('O', '0');
+    normalized = normalized.replaceAll('o', '0');
+    normalized = normalized.replaceAll('I', '1');
+    normalized = normalized.replaceAll('l', '1');
+    
+    // 合并连续横杠：-- → -，--- → -，等等
+    normalized = normalized.replaceAll(RegExp(r'[-—－]{2,}'), '-');
+    // 去除首尾横杠
+    normalized = normalized.replaceAll(RegExp(r'^[-—－]+|[-—－]+$'), '');
+    return normalized;
   }
   
   /// 检查是否为“可疑的日期格式”
@@ -101,7 +169,7 @@ class PickupCodeExtractor {
     // Priority 1: 带标签的取件码
     final labelMatch = RegexPatterns.labeledPickupCode.firstMatch(text);
     if (labelMatch != null) {
-      final code = labelMatch.group(1)!;
+      final code = _normalizePickupCode(labelMatch.group(1)!);
       if (_isValidPickupCode(code) && !RegExp(r'^\d{10,}$').hasMatch(code)) {
         return ExtractionResult(
           value: code,
@@ -114,7 +182,7 @@ class PickupCodeExtractor {
     // Priority 2: 短格式取件码
     final shortMatch = RegexPatterns.shortPickupCode.firstMatch(text);
     if (shortMatch != null) {
-      final code = shortMatch.group(1)!;
+      final code = _normalizePickupCode(shortMatch.group(1)!);
       if (_isValidPickupCode(code) && !RegExp(r'^\d{10,}$').hasMatch(code)) {
         return ExtractionResult(
           value: code,
@@ -127,12 +195,26 @@ class PickupCodeExtractor {
     // Priority 3: Bay格式
     final bayMatch = RegexPatterns.bayFormatCode.firstMatch(text);
     if (bayMatch != null) {
-      final code = bayMatch.group(0)!;
+      final code = _normalizePickupCode(bayMatch.group(0)!);
       if (_isValidPickupCode(code)) {
         return ExtractionResult(
           value: code,
           confidence: 0.85,
           source: 'bay_format',
+        );
+      }
+    }
+
+    // Priority 3.5: PDD"取件出单号后五位"格式（如：06389）
+    final tailCodePattern = RegExp(r'(?:取件出单号|单号)[后之]?[尾末五]位[：:\s]*(\d{4,6})');
+    final tailMatch = tailCodePattern.firstMatch(text);
+    if (tailMatch != null) {
+      final code = tailMatch.group(1)!;
+      if (_isValidPickupCode(code)) {
+        return ExtractionResult(
+          value: code,
+          confidence: 0.88,
+          source: 'tail_code',
         );
       }
     }
@@ -177,7 +259,7 @@ class PickupCodeExtractor {
         // 没有上下文关键词时，大幅降低置信度
         final confidence = hasLabelContext ? 0.8 : 0.3;
         return ExtractionResult(
-          value: code,
+          value: _normalizePickupCode(code),
           confidence: confidence,
           source: hasLabelContext ? 'digit_code_with_context' : 'digit_code_no_context',
         );
@@ -427,12 +509,17 @@ class StationExtractor {
 
 /// 运单号提取器
 class TrackingNumberExtractor {
+  /// 规范化运单号：去除多余空格、制表符
+  static String _normalizeTrackingNumber(String number) {
+    return number.replaceAll(RegExp(r'[\s\t]+'), '');
+  }
+
   static ExtractionResult<String> extract(String text) {
     // Priority 1: 带标签的运单号
     final labelMatch = RegexPatterns.labeledTrackingNumber.firstMatch(text);
     if (labelMatch != null) {
       return ExtractionResult(
-        value: labelMatch.group(1)!,
+        value: _normalizeTrackingNumber(labelMatch.group(1)!),
         confidence: 0.95,
         source: 'labeled_tracking',
       );
@@ -441,16 +528,25 @@ class TrackingNumberExtractor {
     // Priority 2: 快递公司+运单号（保留前缀）
     final courierMatch = RegexPatterns.courierTrackingNumber.firstMatch(text);
     if (courierMatch != null) {
-      // 使用 group(0) 获取完整匹配（包含快递公司名和前缀字母）
       var fullMatch = courierMatch.group(0) ?? '';
-      // 清理可能的空白字符
-      fullMatch = fullMatch.replaceAll(RegExp(r'\s+'), '');
-      // 提取纯运单号部分（去掉公司名）
+      fullMatch = _normalizeTrackingNumber(fullMatch);
       final pureNumber = courierMatch.group(1) ?? fullMatch;
       return ExtractionResult(
-        value: pureNumber.isNotEmpty ? pureNumber : fullMatch,
+        value: pureNumber.isNotEmpty ? _normalizeTrackingNumber(pureNumber) : fullMatch,
         confidence: 0.9,
         source: 'courier_tracking',
+      );
+    }
+
+    // Priority 2.5: 宽松快递公司+运单号（短名称+数字，如"申通777407042267539"）
+    final looseCourierMatch = RegexPatterns.looseCourierTrackingNumber.firstMatch(text);
+    if (looseCourierMatch != null) {
+      var fullMatch = looseCourierMatch.group(0) ?? '';
+      fullMatch = _normalizeTrackingNumber(fullMatch);
+      return ExtractionResult(
+        value: fullMatch,
+        confidence: 0.82,
+        source: 'loose_courier_tracking',
       );
     }
 
@@ -468,8 +564,7 @@ class TrackingNumberExtractor {
     for (final pattern in prefixPatterns) {
       final match = pattern.firstMatch(text);
       if (match != null) {
-        // 使用 group(0) 获取完整匹配（包含前缀）
-        final number = match.group(0)!;
+        final number = _normalizeTrackingNumber(match.group(0)!);
         if (!RegexPatterns.phoneNumber.hasMatch(number)) {
           return ExtractionResult(
             value: number,
@@ -483,7 +578,7 @@ class TrackingNumberExtractor {
     // Priority 4: 宽松长数字兜底（10-18位）
     final looseMatch = RegexPatterns.looseNumericTracking.firstMatch(text);
     if (looseMatch != null) {
-      final number = looseMatch.group(1)!;
+      final number = _normalizeTrackingNumber(looseMatch.group(1)!);
       if (!RegexPatterns.phoneNumber.hasMatch(number)) {
         return ExtractionResult(
           value: number,
@@ -586,16 +681,50 @@ class StatusExtractor {
     return _determineBySignals(signals);
   }
 
+  /// 状态优先级：pickedUp > delivering > arrived > transit > archived
+  static int _statusPriority(PackageStatus status) {
+    switch (status) {
+      case PackageStatus.pickedUp:
+        return 4;
+      case PackageStatus.delivering:
+        return 3;
+      case PackageStatus.arrived:
+        return 2;
+      case PackageStatus.transit:
+        return 1;
+      case PackageStatus.archived:
+        return 0;
+    }
+  }
+
   /// 匹配高置信度关键词
   static ExtractionResult<PackageStatus>? _matchDirectKeywords(String text) {
     PackageStatus? found;
     var bestLen = 0;
+    var bestPriority = 0;
 
     for (final entry in StatusDictionary.stageMap.entries) {
       if (!text.contains(entry.key)) continue;
-      if (entry.key.length > bestLen) {
+      final priority = _statusPriority(entry.value);
+      // 优先按优先级排序，同优先级再按长度排序
+      if (priority > bestPriority || (priority == bestPriority && entry.key.length > bestLen)) {
         found = entry.value;
+        bestPriority = priority;
         bestLen = entry.key.length;
+      }
+    }
+
+    // 特殊处理：如果包含"已到达" + 地点的情况
+    if (found == null && text.contains('已到达')) {
+      // 检查是否有地点关键词
+      final hasStationKeyword = StatusDictionary.locationSignals.any((s) => text.contains(s));
+      final hasPickupCode = StatusDictionary.pickupCodeSignals.any((s) => text.contains(s));
+      if (hasStationKeyword || hasPickupCode) {
+        return ExtractionResult(
+          value: PackageStatus.arrived,
+          confidence: 0.88,
+          source: 'has_arrived_and_location',
+        );
       }
     }
 
@@ -615,18 +744,17 @@ class StatusExtractor {
     // 检查是否真的提取到了取件码（使用 PickupCodeExtractor）
     final pickupCodeResult = PickupCodeExtractor.extract(text);
     final hasExtractedPickupCode = pickupCodeResult.value.isNotEmpty && 
-        pickupCodeResult.confidence >= 0.7;
+        pickupCodeResult.confidence >= 0.6; // 降低要求到 0.6
     
     // 检查是否包含取件码关键词
     final hasPickupCodeKeyword = _containsAny(text, StatusDictionary.pickupCodeSignals);
     
-    // 取件码信号 = 真的提取到了取件码 AND 包含取件码关键词
-    // 这样可以避免误匹配时间、日期等数字
-    final hasPickupCodeSignal = hasExtractedPickupCode && hasPickupCodeKeyword;
+    // 取件码信号 = 真的提取到了取件码 OR 包含取件码关键词（放松条件！）
+    final hasPickupCodeSignal = hasExtractedPickupCode || hasPickupCodeKeyword;
     
-    // 地点信号 = 包含地点关键词 AND 位置类型为取件站点
+    // 地点信号 = 包含地点关键词 OR 位置类型为取件站点（放松条件！）
     final hasLocationKeyword = _containsAny(text, StatusDictionary.locationSignals);
-    final hasLocationSignal = hasLocationKeyword && locationType == LocationType.pickupStation;
+    final hasLocationSignal = hasLocationKeyword || locationType == LocationType.pickupStation;
     
     return StatusSignals(
       hasPickupCodeSignal: hasPickupCodeSignal,
@@ -664,19 +792,17 @@ class StatusExtractor {
       );
     }
 
-    // ── 运送中判定 ──────────────────────────────────────────────
-    // 揽收/运输信号单独出现即可判定
-    if (signals.hasTransitSignal) {
+    // ── 已到达判定（优先于 transit！！！）────────────────────────────
+    // 规则1：只要同时有取件码信号和地点信号，就直接判定 arrived！
+    if (signals.hasPickupCodeSignal && signals.hasLocationSignal) {
       return ExtractionResult(
-        value: PackageStatus.transit,
-        confidence: 0.85,
-        source: 'transit_signal',
+        value: PackageStatus.arrived,
+        confidence: 0.88,
+        source: 'pickupcode_and_location',
       );
     }
 
-    // ── 已到达判定（多信号验证）──────────────────────────────────
-    // 需要至少 2 个信号同时满足才推断为 arrived
-    // 且必须包含取件码信号或地点信号
+    // 规则2：检查 arrived 相关信号计数
     final arrivedSignalCount = signals.arrivedSignalCount;
     final hasEssentialSignal = signals.hasPickupCodeSignal || signals.hasLocationSignal;
 
@@ -695,6 +821,16 @@ class StatusExtractor {
         value: PackageStatus.arrived,
         confidence: 0.6,
         source: 'single_signal_arrived',
+      );
+    }
+
+    // ── 运送中判定 ──────────────────────────────────────────────
+    // 揽收/运输信号单独出现即可判定（现在放在 arrived 之后！）
+    if (signals.hasTransitSignal) {
+      return ExtractionResult(
+        value: PackageStatus.transit,
+        confidence: 0.85,
+        source: 'transit_signal',
       );
     }
 

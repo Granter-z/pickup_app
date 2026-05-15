@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:hive/hive.dart';
 import '../../main.dart';
@@ -22,17 +23,18 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
   };
 
   PackageListNotifier() : super([]) {
+    debugPrint('[PackageListNotifier] initializing...');
     DebugTrace.separator('PACKAGE PROVIDER INIT');
 
     // ── Step 1: 获取 Hive box ────────────────────────────────
     try {
       _box = Hive.box<HivePackage>(kPackagesBox);
-      print('Hive box opened: ${_box!.name}');
-      print('box.isOpen: ${_box!.isOpen}');
-      print('box.length: ${_box!.length}');
+      debugPrint('[PackageListNotifier] Hive box opened: ${_box!.name}');
+      debugPrint('[PackageListNotifier] box.isOpen: ${_box!.isOpen}');
+      debugPrint('[PackageListNotifier] box.length: ${_box!.length}');
     } catch (e, stack) {
       DebugTrace.error('Hive box open FAILED', error: e, stackTrace: stack);
-      print('Falling back to _initialPackages (no Hive persistence)');
+      debugPrint('[PackageListNotifier] Falling back to _initialPackages (no Hive persistence)');
       state = _initialPackages;
       return;
     }
@@ -44,36 +46,39 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
         try {
           final pkg = hivePkg.toPackage();
           loaded.add(pkg);
-          print('loaded: id=${pkg.id} '
-              'tracking=${pkg.trackingNumber} '
-              'code=${pkg.pickupCode} '
-              'status=${pkg.status.label}');
+          debugPrint('[PackageListNotifier] loaded: id=${pkg.id}'
+              ' tracking=${pkg.trackingNumber}'
+              ' code=${pkg.pickupCode}'
+              ' status=${pkg.status.label}');
         } catch (e) {
-          print('FAILED to convert HivePackage: $e');
+          debugPrint('[PackageListNotifier] FAILED to convert HivePackage: $e');
         }
       }
       state = loaded;
-      print('Loaded ${loaded.length} packages from Hive');
+      debugPrint('[PackageListNotifier] Loaded ${loaded.length} packages from Hive');
     } else {
-      print('Hive box is EMPTY, using _initialPackages (${_initialPackages.length} items)');
+      debugPrint('[PackageListNotifier] Hive box is EMPTY, using _initialPackages (${_initialPackages.length} items)');
       state = _initialPackages;
     }
 
     // ── Step 3: 同步回 Hive ──────────────────────────────────
     _sync();
-    print('Synced ${state.length} packages back to Hive');
+    debugPrint('[PackageListNotifier] Synced ${state.length} packages back to Hive');
     DebugTrace.separator('PACKAGE PROVIDER INIT DONE');
+    debugPrint('[PackageListNotifier] initialized. Total packages in state: ${state.length}');
   }
 
   void addPackage(Package package) {
+    debugPrint('[PackageListNotifier] addPackage called (id: ${package.id})');
     DebugTrace.separator('ADD PACKAGE START');
-    print('incoming: courier=${package.courier.displayName} '
+    debugPrint('[PackageListNotifier] incoming: courier=${package.courier.displayName} '
         'tracking="${package.trackingNumber}" '
         'code=${package.pickupCode} '
         'location=${package.location} '
+        'station=${package.originalStation} '
         'status=${package.status.label} '
         'fingerprint=${package.transitFingerprint}');
-    print('state before: ${state.length} packages');
+    debugPrint('[PackageListNotifier] state before: ${state.length} packages');
 
     // ── Step 1: Dedupe ───────────────────────────────────────
     final existingIndex = _findExistingPackage(package);
@@ -82,7 +87,8 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
       // ── Step 2a: Merge ─────────────────────────────────────
       DebugTrace.separator('MERGE EXISTING PACKAGE');
       final existing = state[existingIndex];
-      print('existing: id=${existing.id} '
+      debugPrint('[PackageListNotifier] existing package found! Merging (id: ${existing.id})');
+      debugPrint('[PackageListNotifier] existing: id=${existing.id} '
           'tracking=${existing.trackingNumber} '
           'status=${existing.status.label} '
           'notifiedArrived=${existing.notifiedArrived}');
@@ -91,15 +97,25 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
 
       final updated = existing.copyWith(
         location: package.location.isNotEmpty ? package.location : existing.location,
+        originalStation: package.originalStation.isNotEmpty ? package.originalStation : existing.originalStation,
         pickupCode: package.pickupCode.isNotEmpty ? package.pickupCode : existing.pickupCode,
         description: package.description.isNotEmpty ? package.description : existing.description,
         urgency: _higherUrgency(existing.urgency, package.urgency),
         addedAt: package.addedAt.isAfter(existing.addedAt) ? package.addedAt : existing.addedAt,
         status: resolvedStatus,
         transitFingerprint: package.transitFingerprint ?? existing.transitFingerprint,
+        // 合并两个包裹的 events，去重
+        events: [...existing.events, ...package.events]..fold(<String>{}, (ids, event) {
+          if (!ids.contains(event.id)) {
+            ids.add(event.id);
+          }
+          return ids;
+        }).map((id) {
+          return existing.events.firstWhere((e) => e.id == id, orElse: () => package.events.firstWhere((e) => e.id == id));
+        }).toList(),
       );
 
-      print('merged: status=${updated.status.label} '
+      debugPrint('[PackageListNotifier] merged: status=${updated.status.label} '
           'urgency=${updated.urgency.label} '
           'location=${updated.location}');
 
@@ -109,23 +125,26 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
       ];
 
       if (updated.status.isArrived && !updated.notifiedArrived) {
+        debugPrint('[PackageListNotifier] arrived, triggering notification');
         _triggerArrivedNotification(updated);
       }
     } else {
       // ── Step 2b: Create ────────────────────────────────────
       DebugTrace.separator('CREATE NEW PACKAGE');
-      print('new: id=${package.id} tracking=${package.trackingNumber}');
+      debugPrint('[PackageListNotifier] no existing package found, creating new');
+      debugPrint('[PackageListNotifier] new: id=${package.id} tracking=${package.trackingNumber}');
 
       state = [...state, package];
 
       if (package.status.isArrived && !package.notifiedArrived) {
+        debugPrint('[PackageListNotifier] arrived, triggering notification');
         _triggerArrivedNotification(package);
       }
     }
 
     // ── Step 3: Persist ──────────────────────────────────────
     _sync();
-    print('state after: ${state.length} packages');
+    debugPrint('[PackageListNotifier] addPackage completed. Final state: ${state.length} packages');
 
     DebugTrace.separator('ADD PACKAGE COMPLETE');
   }
@@ -147,97 +166,35 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     notificationService.scheduleReminderNotification(package);
   }
   
-  /// 规范化 trackingNumber：去首尾空格、合并内部空格、统一小写
-  static String _normalizeTracking(String raw) {
-    return raw.trim().replaceAll(RegExp(r'\s+'), '').toLowerCase();
-  }
-
   /// 查找已存在的相同包裹
   ///
-  /// Enhanced identity system（2026-05-10 fix）：
-  ///   Priority 1: trackingNumber + pickupCode（联合身份，防止同运单不同取件码被覆盖）
-  ///   Priority 2: pickupCode + location（取件身份）
-  ///   Priority 3: transitFingerprint（弱匹配 fallback）
+  /// 去重标准：指纹匹配（Fingerprint V1）
+  /// 使用 fingerprint 作为唯一判断标准
+  /// 高概率识别同一包裹
   int _findExistingPackage(Package package) {
+    debugPrint('[PackageListNotifier] _findExistingPackage called');
     DebugTrace.separator('DEDUPE CHECK');
 
-    // ── Dump current state ────────────────────────────────────
-    print('state.length: ${state.length}');
+    debugPrint('[PackageListNotifier] state.length: ${state.length}');
+    debugPrint('[PackageListNotifier] Incoming fingerprint: ${package.fingerprint}');
     for (var i = 0; i < state.length; i++) {
       final p = state[i];
-      print('  [$i] id=${p.id} tracking="${p.trackingNumber}" '
-          'code=${p.pickupCode} status=${p.status.label}');
+      debugPrint('[PackageListNotifier]   [$i] id=${p.id} tracking="${p.trackingNumber}" '
+          'fingerprint=${p.fingerprint} status=${p.status.label}');
     }
 
-    // ── Priority 1: trackingNumber + pickupCode（联合判断）────
-    final incomingTracking = _normalizeTracking(package.trackingNumber);
-    if (incomingTracking.isNotEmpty && package.pickupCode.isNotEmpty) {
-      print('Priority 1: trackingNumber="${package.trackingNumber}" '
-          '→ normalized="$incomingTracking" '
-          'pickupCode=${package.pickupCode}');
-      final index = state.indexWhere((p) {
-        final existingTracking = _normalizeTracking(p.trackingNumber);
-        return existingTracking.isNotEmpty &&
-               existingTracking == incomingTracking &&
-               p.pickupCode == package.pickupCode;
-      });
+    // 使用 fingerprint 查找
+    debugPrint('[PackageListNotifier] Dedupe by fingerprint: ${package.fingerprint}');
+    final index = state.indexWhere((p) => p.fingerprint == package.fingerprint);
 
-      if (index != -1) {
-        Metrics.inc('dedupe.hit');
-        print('→ HIT: index=$index id=${state[index].id} (tracking+code match)');
-        return index;
-      }
-      print('→ miss (no entry matches both tracking AND code)');
-    } else if (incomingTracking.isNotEmpty) {
-      // 运单号有值但取件码为空时，降级为仅运单号匹配（兼容旧数据）
-      print('Priority 1 (fallback): trackingNumber only (no pickupCode)');
-      final index = state.indexWhere((p) {
-        final existing = _normalizeTracking(p.trackingNumber);
-        return existing.isNotEmpty && existing == incomingTracking;
-      });
-
-      if (index != -1) {
-        Metrics.inc('dedupe.hit');
-        print('→ HIT: index=$index id=${state[index].id} (tracking-only match)');
-        return index;
-      }
-      print('→ miss');
+    if (index != -1) {
+      Metrics.inc('dedupe.hit');
+      debugPrint('[PackageListNotifier] → HIT: index=$index id=${state[index].id} (fingerprint match)');
+      return index;
     }
 
-    // ── Priority 2: pickupCode + location ─────────────────────
-    if (package.pickupCode.isNotEmpty && package.location.isNotEmpty) {
-      print('Priority 2: pickupCode=${package.pickupCode} location=${package.location}');
-      final index = state.indexWhere((p) =>
-          p.pickupCode == package.pickupCode &&
-          p.location == package.location);
-
-      if (index != -1) {
-        Metrics.inc('dedupe.hit');
-        print('→ HIT: index=$index id=${state[index].id}');
-        return index;
-      }
-      print('→ miss');
-    }
-
-    // ── Priority 3: transitFingerprint（弱匹配）───────────────
-    final fingerprint = package.transitFingerprint;
-    if (fingerprint != null && fingerprint.isNotEmpty) {
-      print('Priority 3: transitFingerprint=$fingerprint');
-      final index = state.indexWhere((p) =>
-          p.status.isPending &&
-          p.transitFingerprint == fingerprint);
-
-      if (index != -1) {
-        Metrics.inc('dedupe.hit');
-        print('→ HIT: index=$index id=${state[index].id}');
-        return index;
-      }
-      print('→ miss');
-    }
-
-    // ── No match ─────────────────────────────────────────────
     Metrics.inc('dedupe.miss');
-    print('→ NO MATCH (all priorities exhausted)');
+    debugPrint('[PackageListNotifier] → NO MATCH (no fingerprint match)');
     return -1;
   }
   
@@ -253,11 +210,11 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     final incomingPri = _statusPriority[incoming] ?? 0;
 
     DebugTrace.separator('STATUS RESOLUTION');
-    print('existing=${existing.label}($existingPri) '
+    debugPrint('[PackageListNotifier] existing=${existing.label}($existingPri) '
         'incoming=${incoming.label}($incomingPri)');
 
     final resolved = incomingPri > existingPri ? incoming : existing;
-    print('resolved=${resolved.label}');
+    debugPrint('[PackageListNotifier] resolved=${resolved.label}');
 
     return resolved;
   }
@@ -351,7 +308,7 @@ final groupedPendingPackagesProvider = Provider<Map<String, List<Package>>>((ref
   final grouped = <String, List<Package>>{};
   
   for (final package in pending) {
-    final location = package.location.isNotEmpty ? package.location : '未指定取货点';
+    final location = package.displayLocation;
     grouped.putIfAbsent(location, () => []).add(package);
   }
   

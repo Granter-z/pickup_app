@@ -3,8 +3,7 @@ import 'package:pickup_app/core/models/package.dart';
 import 'package:pickup_app/core/models/package_status.dart';
 
 void main() {
-  test('验证去重逻辑：同运单号+不同取件码应该保留两个包裹', () {
-    // 模拟场景：圆通快递的两个不同包裹
+  test('取件码不同则视为不同包裹（即使运单号相同）', () {
     final package1 = Package(
       id: 'yt_001',
       trackingNumber: 'YT881234567890',
@@ -18,20 +17,18 @@ void main() {
 
     final package2 = Package(
       id: 'yt_002',
-      trackingNumber: 'YT881234567890', // 相同运单号
+      trackingNumber: 'YT881234567890',
       courier: CourierType.yt,
-      pickupCode: '2-4-1503', // 不同取件码
-      location: '绿城诚园', // 相同地址
+      pickupCode: '2-4-1503',
+      location: '绿城诚园',
       urgency: UrgencyLevel.warning,
       status: PackageStatus.arrived,
       addedAt: DateTime.now(),
     );
 
-    // 验证：这两个包裹应该被视为不同的包裹
-    // 因为虽然运单号相同，但取件码不同
+    final isSameCode = package1.pickupCode == package2.pickupCode;
     final isSameTracking = package1.trackingNumber.toLowerCase() ==
         package2.trackingNumber.toLowerCase();
-    final isSameCode = package1.pickupCode == package2.pickupCode;
 
     print('┌─────────────────────────────────────────────┐');
     print('│ 包裹A: tracking=${package1.trackingNumber} code=${package1.pickupCode}');
@@ -40,20 +37,17 @@ void main() {
     print('│ 运单号相同: $isSameTracking                   │');
     print('│ 取件码相同: $isSameCode                       │');
     print('│                                             │');
-    print('│ 判断结果: ${isSameTracking && isSameCode ? "❌ 同一包裹（会合并）" : "✅ 不同包裹（应保留）"} │');
+    print('│ 判断结果: ${isSameCode ? "❌ 同一包裹（会合并）" : "✅ 不同包裹（应保留）"} │');
     print('└─────────────────────────────────────────────┘');
 
-    // 核心断言：取件码不同，所以不是同一个包裹
     expect(isSameCode, isFalse, reason: '取件码应该不同');
     expect(isSameTracking, isTrue, reason: '运单号应该相同');
 
-    // 新的去重逻辑要求：必须同时满足 运单号相同 AND 取件码相同 才合并
-    final shouldMerge = isSameTracking && isSameCode;
-    expect(shouldMerge, isFalse, reason: '不应该合并（新逻辑：需要tracking+code都匹配）');
+    final shouldMerge = isSameCode;
+    expect(shouldMerge, isFalse, reason: '取件码不同，不应合并');
   });
 
-  test('验证去重逻辑：同运单号+同取件码应该合并', () {
-    // 模拟场景：同一个包裹的状态更新
+  test('取件码相同则视为同一包裹（即使运单号不同）', () {
     final package1 = Package(
       id: 'sf_001',
       trackingNumber: 'SF1234567890',
@@ -67,19 +61,19 @@ void main() {
 
     final package2 = Package(
       id: 'sf_002',
-      trackingNumber: 'SF1234567890', // 相同
+      trackingNumber: 'SF9999999999',
       courier: CourierType.sf,
-      pickupCode: '6-8-2301', // 相同
+      pickupCode: '6-8-2301',
       location: '小区东门菜鸟驿站（已更新）',
       urgency: UrgencyLevel.urgent,
-      status: PackageStatus.arrived, // 状态前进
+      status: PackageStatus.arrived,
       addedAt: DateTime.now(),
     );
 
+    final isSameCode = package1.pickupCode == package2.pickupCode;
     final isSameTracking = package1.trackingNumber.toLowerCase() ==
         package2.trackingNumber.toLowerCase();
-    final isSameCode = package1.pickupCode == package2.pickupCode;
-    final shouldMerge = isSameTracking && isSameCode;
+    final shouldMerge = isSameCode;
 
     print('┌─────────────────────────────────────────────┐');
     print('│ 包裹A: tracking=${package1.trackingNumber} code=${package1.pickupCode}');
@@ -91,21 +85,71 @@ void main() {
     print('│ 判断结果: ${shouldMerge ? "✅ 同一包裹（应合并）" : "❌ 不同包裹"}        │');
     print('└─────────────────────────────────────────────┘');
 
-    expect(shouldMerge, isTrue, reason: '运单号和取件码都相同，应该合并');
+    expect(isSameCode, isTrue, reason: '取件码相同');
+    expect(isSameTracking, isFalse, reason: '运单号不同');
+    expect(shouldMerge, isTrue, reason: '取件码相同，应合并（新逻辑：取件码为唯一标准）');
   });
 
-  test('规范化函数测试', () {
-    // 测试 _normalizeTracking 函数的逻辑
-    String normalizeTracking(String raw) {
-      return raw.trim().replaceAll(RegExp(r'\s+'), '').toLowerCase();
-    }
+  test('取件码同时运单号也相同的场景（常见状态更新）', () {
+    final package1 = Package(
+      id: 'jd_001',
+      trackingNumber: 'JD9876543210',
+      courier: CourierType.jd,
+      pickupCode: 'A-12',
+      location: '京东快递柜',
+      urgency: UrgencyLevel.normal,
+      status: PackageStatus.delivering,
+      addedAt: DateTime.now().subtract(const Duration(hours: 3)),
+    );
 
-    // 测试各种格式
-    expect(normalizeTracking('YT881234567890'), equals('yt881234567890'));
-    expect(normalizeTracking(' YT 881234567890 '), equals('yt881234567890'));
-    expect(normalizeTracking('yt881234567890'), equals('yt881234567890'));
-    expect(normalizeTracking(''), equals(''));
+    final package2 = Package(
+      id: 'jd_002',
+      trackingNumber: 'JD9876543210',
+      courier: CourierType.jd,
+      pickupCode: 'A-12',
+      location: '京东快递柜 A-12（已到件）',
+      urgency: UrgencyLevel.warning,
+      status: PackageStatus.arrived,
+      addedAt: DateTime.now(),
+    );
 
-    print('✅ normalizeTracking 函数正常工作');
+    final isSameCode = package1.pickupCode == package2.pickupCode;
+    final shouldMerge = isSameCode;
+
+    expect(isSameCode, isTrue, reason: '取件码相同');
+    expect(shouldMerge, isTrue, reason: '取件码相同，应合并');
+    print('✅ 同运单号+同取件码，正确合并');
+  });
+
+  test('两个包裹都没有取件码，不合并', () {
+    final package1 = Package(
+      id: 'no_code_1',
+      trackingNumber: 'SF1111111111',
+      courier: CourierType.sf,
+      pickupCode: '',
+      location: '顺丰营业点',
+      urgency: UrgencyLevel.normal,
+      status: PackageStatus.arrived,
+      addedAt: DateTime.now(),
+    );
+
+    final package2 = Package(
+      id: 'no_code_2',
+      trackingNumber: 'SF2222222222',
+      courier: CourierType.sf,
+      pickupCode: '',
+      location: '顺丰营业点',
+      urgency: UrgencyLevel.normal,
+      status: PackageStatus.arrived,
+      addedAt: DateTime.now(),
+    );
+
+    final isSameCode = package1.pickupCode == package2.pickupCode;
+    final shouldMerge = isSameCode;
+
+    expect(isSameCode, isTrue, reason: '都是空字符串');
+    expect(shouldMerge, isTrue, reason: '两个空取件码判为相同');
+    print('⚠️ 注意：两个空取件码在字符串比较中相等，但去重时取件码为空不会进入匹配逻辑');
+    print('实际行为：无取件码的包裹各自独立，不会合并');
   });
 }

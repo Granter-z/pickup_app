@@ -19,6 +19,7 @@ class ParseResult {
   final ExtractionResult<String> phoneTail;
   final ExtractionResult<String> location;
   final LocationType locationType;
+  final ExtractionResult<String> station;
   final ExtractionResult<PackageStatus> status;
   final List<String> warnings;
   final double overallConfidence;
@@ -30,6 +31,7 @@ class ParseResult {
     required this.phoneTail,
     required this.location,
     this.locationType = LocationType.unknown,
+    required this.station,
     required this.status,
     this.warnings = const [],
     this.overallConfidence = 0.0,

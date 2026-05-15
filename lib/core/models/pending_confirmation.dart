@@ -25,6 +25,9 @@ class PendingConfirmation {
   
   /// 解析出的取货地点
   final String location;
+
+  /// 原始站点名称（菜鸟驿站等）
+  final String originalStation;
   
   /// 解析出的状态
   final PackageStatus status;
@@ -50,6 +53,7 @@ class PendingConfirmation {
     this.pickupCode = '',
     this.trackingNumber = '',
     this.location = '',
+    this.originalStation = '',
     this.status = PackageStatus.arrived,
     required this.confidence,
     required this.fieldConfidence,
@@ -82,6 +86,7 @@ class PendingConfirmation {
       courier: courier,
       pickupCode: pickupCode,
       location: location,
+      originalStation: originalStation,
       description: _buildDescription(),
       urgency: UrgencyLevel.normal,
       status: status,
@@ -104,6 +109,7 @@ class PendingConfirmation {
     String? pickupCode,
     String? trackingNumber,
     String? location,
+    String? originalStation,
     PackageStatus? status,
     double? confidence,
     FieldConfidence? fieldConfidence,
@@ -117,6 +123,7 @@ class PendingConfirmation {
       pickupCode: pickupCode ?? this.pickupCode,
       trackingNumber: trackingNumber ?? this.trackingNumber,
       location: location ?? this.location,
+      originalStation: originalStation ?? this.originalStation,
       status: status ?? this.status,
       confidence: confidence ?? this.confidence,
       fieldConfidence: fieldConfidence ?? this.fieldConfidence,
