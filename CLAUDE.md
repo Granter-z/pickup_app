@@ -96,12 +96,7 @@ ui/ ──────→ app/ ──────→ core/
 Riverpod (`flutter_riverpod`). Root `ProviderScope` wraps the app in `main.dart`.
 
 `PackageListNotifier` (StateNotifier) in `lib/ui/providers/package_provider.dart` is the single source of truth. All mutations go through this notifier; it auto-syncs to Hive via `_sync()`. Derived providers: `pendingPackagesProvider`, `completedPackagesProvider`, `groupedPendingPackagesProvider`, `heroDecisionProvider`.
-
-## Text Parsing Pipeline
-
-```
-Raw text → TextSanitizer (noise filter) → TextPreprocessor (normalize) → TextParser.parseMulti() → ParseResult
-```
+opheliadavis83644@outlook.de
 
 Extractors in `lib/core/parser/extractors.dart`: `CourierExtractor`, `PickupCodeExtractor`, `TrackingNumberExtractor`, `PhoneTailExtractor`, `LocationExtractor`, `StatusExtractor`. Each returns `ExtractionResult<T>` with confidence score. `parseMulti()` splits multi-package text at pickup code boundaries.
 
@@ -143,3 +138,4 @@ Tests in `test/`. Fixtures in `test/fixtures/` organized as `good/`, `bad/`, `ed
 ## Design Tokens
 
 Colors, spacing, radii in `lib/ui/constants/app_constants.dart` (`AppColors`, `AppSpacing`, `AppRadius`). Theme in `lib/ui/theme/app_theme.dart` — Material 3.
+1
