@@ -8,6 +8,7 @@ library;
 
 import 'package_status.dart';
 import 'logistics_event.dart';
+import 'pickup_urgency.dart';
 
 /// 快递公司类型
 enum CourierType {
@@ -137,12 +138,36 @@ class Package {
   final String? transitFingerprint;  // transit 阶段的弱身份标识
   final List<LogisticsEvent> events;
   final String fingerprint;  // 包裹唯一识别指纹
+  final DateTime? timeoutAt; // 预估/解析出的超时截止时间
 
+  // ── 三层地址系统 ─────────────────────────────────────────────
+  final String rawLocation;        // OCR 原始提取，永不覆盖
+  final String cleanedLocation;    // regex 清洗后
+  final String canonicalLocation;  // 最终可信地址（历史收敛）
+  final double locationConfidence; // 地址置信度
+
+  /// 显示用地址：canonicalLocation > cleanedLocation > rawLocation > '未知地点'
   String get displayLocation {
-    if (location.isNotEmpty && originalStation.isNotEmpty) return '$originalStation · $location';
-    if (location.isNotEmpty) return location;
+    final addr = canonicalLocation.isNotEmpty
+        ? canonicalLocation
+        : cleanedLocation.isNotEmpty
+            ? cleanedLocation
+            : rawLocation.isNotEmpty
+                ? rawLocation
+                : '';
+    if (addr.isNotEmpty && originalStation.isNotEmpty) return '$originalStation · $addr';
+    if (addr.isNotEmpty) return addr;
     if (originalStation.isNotEmpty) return originalStation;
     return '未知驿站';
+  }
+
+  /// 取件紧迫度（行动系统的核心）
+  PickupUrgency get pickupUrgency {
+    return PickupUrgencyCalculator.calculate(
+      addedAt: addedAt,
+      isPickedUp: status == PackageStatus.pickedUp,
+      timeoutAt: timeoutAt,
+    );
   }
 
   Package({
@@ -163,6 +188,11 @@ class Package {
     this.transitFingerprint,
     this.events = const [],
     String? fingerprint,
+    this.timeoutAt,
+    this.rawLocation = '',
+    this.cleanedLocation = '',
+    this.canonicalLocation = '',
+    this.locationConfidence = 0.0,
   }) : this.fingerprint = fingerprint ?? buildFingerprintStatic(pickupCode, courier);
 
   /// 构建包裹指纹
@@ -203,6 +233,11 @@ class Package {
     String? transitFingerprint,
     List<LogisticsEvent>? events,
     String? fingerprint,
+    DateTime? timeoutAt,
+    String? rawLocation,
+    String? cleanedLocation,
+    String? canonicalLocation,
+    double? locationConfidence,
   }) {
     return Package(
       id: id ?? this.id,
@@ -222,6 +257,11 @@ class Package {
       transitFingerprint: transitFingerprint ?? this.transitFingerprint,
       events: events ?? this.events,
       fingerprint: fingerprint ?? this.fingerprint,
+      timeoutAt: timeoutAt ?? this.timeoutAt,
+      rawLocation: rawLocation ?? this.rawLocation,
+      cleanedLocation: cleanedLocation ?? this.cleanedLocation,
+      canonicalLocation: canonicalLocation ?? this.canonicalLocation,
+      locationConfidence: locationConfidence ?? this.locationConfidence,
     );
   }
 
@@ -267,5 +307,51 @@ class Package {
   /// 综合紧急程度评分（状态 + 紧急级别）
   int get compositeUrgencyScore {
     return status.urgencyScore + urgency.score * 10;
+  }
+
+  // ── 地址收敛逻辑 ─────────────────────────────────────────────
+
+  /// 计算地址置信度 (0.0 ~ 1.0)
+  static double calculateLocationConfidence(String location) {
+    if (location.isEmpty) return 0.0;
+    double score = 0.0;
+
+    // 加分项
+    if (RegExp(r'省|市|区|县').hasMatch(location)) score += 0.2;
+    if (RegExp(r'小区|花园|公寓|家园|苑|庄|村').hasMatch(location)) score += 0.2;
+    if (RegExp(r'门店|驿站|快递柜|超市|代收点').hasMatch(location)) score += 0.2;
+    if (location.length > 10) score += 0.1;
+
+    // 减分项
+    if (RegExp(r'[^\u4e00-\u9fa5a-zA-Z0-9\s·\-_]').hasMatch(location)) score -= 0.2;
+    if (location.length < 4) score -= 0.2;
+
+    return score.clamp(0.0, 1.0);
+  }
+
+  /// 收敛 canonicalLocation
+  /// 规则：
+  /// 1. 新地址更长 → 替换
+  /// 2. 新地址包含旧地址 → 替换
+  /// 3. 新地址置信度更高 → 替换
+  static String resolveCanonicalLocation({
+    required String existing,
+    required String incoming,
+    required double existingConfidence,
+    required double incomingConfidence,
+  }) {
+    if (incoming.isEmpty) return existing;
+    if (existing.isEmpty) return incoming;
+
+    // 规则1: 新地址更长（更完整）
+    if (incoming.length > existing.length) return incoming;
+
+    // 规则2: 新地址包含旧地址（更具体）
+    if (incoming.contains(existing)) return incoming;
+
+    // 规则3: 新地址置信度更高
+    if (incomingConfidence > existingConfidence) return incoming;
+
+    return existing;
   }
 }

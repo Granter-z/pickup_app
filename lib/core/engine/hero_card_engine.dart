@@ -1,5 +1,5 @@
 /// HeroCard决策引擎 - 纯Dart
-/// 
+///
 /// 职责：
 /// 1. 基于包裹状态生成HeroCard决策
 /// 2. 纯逻辑，不依赖Flutter
@@ -8,38 +8,46 @@ library;
 
 import '../models/package.dart';
 import '../models/package_status.dart';
+import '../models/pickup_urgency.dart';
 import 'hero_card_state.dart';
 
 /// HeroCard决策引擎
 class HeroCardEngine {
   /// 生成HeroCard状态
   static HeroCardState decide(List<Package> allPackages) {
-    final pending = allPackages.where((p) => p.status.isPending).toList();
-    
+    final pending =
+        allPackages.where((p) => p.status.isPending).toList();
+
     // 0件 → 今天暂无快递
     if (pending.isEmpty) {
       return HeroCardState.empty();
     }
-    
+
     final arrived = pending.where((p) => p.status.isArrived).toList();
-    final delivering = pending.where((p) => p.status == PackageStatus.delivering).toList();
-    final transit = pending.where((p) => p.status == PackageStatus.transit).toList();
-    
-    // 计算紧急程度
+    final delivering =
+        pending.where((p) => p.status == PackageStatus.delivering).toList();
+    final transit =
+        pending.where((p) => p.status == PackageStatus.transit).toList();
+
+    // 计算紧急程度（使用新的紧迫度系统）
     final urgencyScore = _calculateUrgencyScore(pending);
     final emotionState = _determineEmotionState(pending, urgencyScore);
-    final heroEmotionState = _determineHeroEmotionState(arrived, urgencyScore);
-    
+    final heroEmotionState =
+        _determineHeroEmotionState(arrived, urgencyScore);
+
     // 生成标题和副标题
-    final title = _generateTitle(arrived, delivering, transit, pending);
+    final title =
+        _generateTitle(arrived, delivering, transit, pending);
     final subtitle = _generateSubtitle(pending, urgencyScore);
-    
+
     // 生成建议动作
-    final suggestedAction = _generateSuggestedAction(pending, urgencyScore);
-    
+    final suggestedAction =
+        _generateSuggestedAction(pending, urgencyScore);
+
     // 生成标签
-    final badges = _generateBadges(pending, arrived, delivering, transit);
-    
+    final badges =
+        _generateBadges(pending, arrived, delivering, transit);
+
     return HeroCardState(
       title: title,
       subtitle: subtitle,
@@ -55,30 +63,36 @@ class HeroCardEngine {
     );
   }
 
-  /// 计算紧急程度评分
+  /// 计算紧急程度评分（使用新的紧迫度系统）
   static int _calculateUrgencyScore(List<Package> pending) {
     if (pending.isEmpty) return 0;
-    
+
+    // 使用新的紧迫度评分
+    final urgencyScores =
+        pending.map((p) => p.pickupUrgency.score * 25).toList();
+    final maxUrgencyScore =
+        urgencyScores.reduce((a, b) => a > b ? a : b);
+
     // 基于状态的评分
-    final statusScores = pending.map((p) => p.status.urgencyScore).toList();
-    final maxStatusScore = statusScores.reduce((a, b) => a > b ? a : b);
-    
-    // 基于紧急级别的评分
-    final urgencyScores = pending.map((p) => p.urgency.score * 10).toList();
-    final maxUrgencyScore = urgencyScores.reduce((a, b) => a > b ? a : b);
-    
+    final statusScores =
+        pending.map((p) => p.status.urgencyScore).toList();
+    final maxStatusScore =
+        statusScores.reduce((a, b) => a > b ? a : b);
+
     // 综合评分
-    return maxStatusScore + maxUrgencyScore;
+    return maxUrgencyScore + maxStatusScore;
   }
 
   /// 确定情绪状态（旧版）
-  static EmotionState _determineEmotionState(List<Package> pending, int urgencyScore) {
+  static EmotionState _determineEmotionState(
+      List<Package> pending, int urgencyScore) {
     if (pending.isEmpty) return EmotionState.calm;
-    
+
     final hasHighUrgency = urgencyScore > 80;
-    final hasMultipleArrived = pending.where((p) => p.status.isArrived).length > 2;
+    final hasMultipleArrived =
+        pending.where((p) => p.status.isArrived).length > 2;
     final hasCluster = _hasLocationCluster(pending);
-    
+
     if (hasHighUrgency) {
       return EmotionState.urgent;
     } else if (hasMultipleArrived) {
@@ -91,11 +105,11 @@ class HeroCardEngine {
   }
 
   /// 确定Hero情绪状态（新版）
-  /// 
+  ///
   /// 映射规则：
   /// - relaxed: 没有 arrived 包裹
   /// - normal: 1~2 个 arrived 包裹
-  /// - urgent: urgencyScore > 80
+  /// - urgent: urgencyScore > 80 或有 critical 包裹
   static HeroEmotionState _determineHeroEmotionState(
     List<Package> arrived,
     int urgencyScore,
@@ -104,12 +118,17 @@ class HeroCardEngine {
     if (urgencyScore > 80) {
       return HeroEmotionState.urgent;
     }
-    
+
+    // 判断是否有 critical 紧迫度的包裹
+    if (arrived.any((p) => p.pickupUrgency == PickupUrgency.critical)) {
+      return HeroEmotionState.urgent;
+    }
+
     // 判断到达数量
     if (arrived.isEmpty) {
       return HeroEmotionState.relaxed;
     }
-    
+
     // arrived.length >= 1 && arrived.length <= 2
     return HeroEmotionState.normal;
   }
@@ -121,8 +140,22 @@ class HeroCardEngine {
     List<Package> transit,
     List<Package> pending,
   ) {
+    // 检查是否有 critical 紧迫度的包裹
+    final criticalPackages =
+        pending.where((p) => p.pickupUrgency == PickupUrgency.critical).toList();
+    if (criticalPackages.isNotEmpty) {
+      return '今天有 ${criticalPackages.length} 个快递面临超时费';
+    }
+
+    // 检查是否有 high 紧迫度的包裹
+    final highUrgencyPackages =
+        pending.where((p) => p.pickupUrgency == PickupUrgency.high).toList();
+    if (highUrgencyPackages.isNotEmpty) {
+      return '有包裹即将超时';
+    }
+
     if (arrived.isNotEmpty) {
-      return '有 ${arrived.length} 件快递待取件';
+      return '今天有 ${arrived.length} 件快递待取件';
     } else if (delivering.isNotEmpty) {
       return '有 ${delivering.length} 个包裹正在派送';
     } else {
@@ -131,30 +164,46 @@ class HeroCardEngine {
   }
 
   /// 生成副标题
-  static String? _generateSubtitle(List<Package> pending, int urgencyScore) {
+  static String? _generateSubtitle(
+      List<Package> pending, int urgencyScore) {
     if (pending.isEmpty) return null;
-    
-    final hasHighUrgency = urgencyScore > 80;
+
+    // 检查是否有 critical 紧迫度的包裹
+    final criticalPackages =
+        pending.where((p) => p.pickupUrgency == PickupUrgency.critical).toList();
+    if (criticalPackages.isNotEmpty) {
+      final pkg = criticalPackages.first;
+      return '单号 ${pkg.trackingNumber} 预计今晚将产生滞留费，请优先处理';
+    }
+
+    // 检查是否有 high 紧迫度的包裹
+    final highUrgencyPackages =
+        pending.where((p) => p.pickupUrgency == PickupUrgency.high).toList();
+    if (highUrgencyPackages.isNotEmpty) {
+      return '目前共 ${pending.length} 个待领，其中 ${highUrgencyPackages.length} 个明天将产生滞留风险';
+    }
+
     final hasCluster = _hasLocationCluster(pending);
-    
-    if (hasHighUrgency) {
+
+    if (urgencyScore > 80) {
       return '建议立即取件';
     } else if (hasCluster) {
       return '建议一起取，节省跑腿';
     } else {
-      return null;
+      return '建议下班顺路前往自提点一次性打包回家';
     }
   }
 
   /// 生成建议动作
-  static SuggestedAction _generateSuggestedAction(List<Package> pending, int urgencyScore) {
+  static SuggestedAction _generateSuggestedAction(
+      List<Package> pending, int urgencyScore) {
     if (pending.isEmpty) {
       return SuggestedAction.none;
     }
-    
+
     final hasHighUrgency = urgencyScore > 80;
     final hasCluster = _hasLocationCluster(pending);
-    
+
     if (hasHighUrgency) {
       return SuggestedAction.pickUpNow;
     } else if (hasCluster) {
@@ -172,7 +221,7 @@ class HeroCardEngine {
     List<Package> transit,
   ) {
     final badges = <HeroBadge>[];
-    
+
     // 待处理数量
     if (pending.isNotEmpty) {
       badges.add(HeroBadge(
@@ -180,16 +229,19 @@ class HeroCardEngine {
         type: HeroBadgeType.count,
       ));
     }
-    
-    // 紧急标签
-    final hasHighUrgency = pending.any((p) => p.status.urgencyScore > 80);
-    if (hasHighUrgency) {
+
+    // 紧急标签（使用新的紧迫度系统）
+    final hasCriticalUrgency =
+        pending.any((p) => p.pickupUrgency == PickupUrgency.critical);
+    final hasHighUrgency =
+        pending.any((p) => p.pickupUrgency == PickupUrgency.high);
+    if (hasCriticalUrgency || hasHighUrgency) {
       badges.add(HeroBadge(
         label: '紧急',
         type: HeroBadgeType.urgent,
       ));
     }
-    
+
     // 位置聚类标签
     final hasCluster = _hasLocationCluster(pending);
     if (hasCluster) {
@@ -198,7 +250,7 @@ class HeroCardEngine {
         type: HeroBadgeType.location,
       ));
     }
-    
+
     return badges;
   }
 
@@ -209,7 +261,8 @@ class HeroCardEngine {
   }
 
   /// 按位置分组
-  static Map<String, List<Package>> _groupByLocation(List<Package> packages) {
+  static Map<String, List<Package>> _groupByLocation(
+      List<Package> packages) {
     final map = <String, List<Package>>{};
     for (final p in packages) {
       final key = p.location.isNotEmpty ? p.location : 'unknown';

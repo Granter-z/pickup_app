@@ -47,6 +47,12 @@ class PendingConfirmation {
   /// 创建时间
   final DateTime createdAt;
 
+  /// OCR 原始提取地址
+  final String rawLocation;
+
+  /// regex 清洗后地址
+  final String cleanedLocation;
+
   const PendingConfirmation({
     required this.id,
     required this.courier,
@@ -60,6 +66,8 @@ class PendingConfirmation {
     this.rawText = '',
     this.warnings = const [],
     required this.createdAt,
+    this.rawLocation = '',
+    this.cleanedLocation = '',
   });
 
   /// 是否为低置信度（需要确认）
@@ -91,6 +99,10 @@ class PendingConfirmation {
       urgency: UrgencyLevel.normal,
       status: status,
       addedAt: DateTime.now(),
+      rawLocation: rawLocation,
+      cleanedLocation: cleanedLocation,
+      canonicalLocation: cleanedLocation,
+      locationConfidence: Package.calculateLocationConfidence(cleanedLocation),
     );
   }
 
@@ -116,6 +128,8 @@ class PendingConfirmation {
     String? rawText,
     List<String>? warnings,
     DateTime? createdAt,
+    String? rawLocation,
+    String? cleanedLocation,
   }) {
     return PendingConfirmation(
       id: id ?? this.id,
@@ -130,6 +144,8 @@ class PendingConfirmation {
       rawText: rawText ?? this.rawText,
       warnings: warnings ?? this.warnings,
       createdAt: createdAt ?? this.createdAt,
+      rawLocation: rawLocation ?? this.rawLocation,
+      cleanedLocation: cleanedLocation ?? this.cleanedLocation,
     );
   }
 }

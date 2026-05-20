@@ -93,13 +93,17 @@ class HivePackageAdapter extends TypeAdapter<HivePackage> {
       transitFingerprint: fields[12] as String?,
       originalStation: fields[13] as String? ?? '',
       fingerprint: fields[14] as String?,
+      rawLocation: fields[15] as String? ?? '',
+      cleanedLocation: fields[16] as String? ?? '',
+      canonicalLocation: fields[17] as String? ?? '',
+      locationConfidence: fields[18] as double? ?? 0.0,
     );
   }
 
   @override
   void write(BinaryWriter writer, HivePackage obj) {
     writer
-      ..writeByte(15)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -129,6 +133,14 @@ class HivePackageAdapter extends TypeAdapter<HivePackage> {
       ..writeByte(13)
       ..write(obj.originalStation)
       ..writeByte(14)
-      ..write(obj.fingerprint);
+      ..write(obj.fingerprint)
+      ..writeByte(15)
+      ..write(obj.rawLocation)
+      ..writeByte(16)
+      ..write(obj.cleanedLocation)
+      ..writeByte(17)
+      ..write(obj.canonicalLocation)
+      ..writeByte(18)
+      ..write(obj.locationConfidence);
   }
 }

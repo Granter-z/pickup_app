@@ -1,20 +1,23 @@
-/// OCR 冲突检测器
-/// 
+/// OCR 冲突检测器（增强版）
+///
 /// 职责：
 /// 1. 检测 OCR 文本中的信号冲突
-/// 2. 判断 transit signals 和 arrival signals 是否同时存在
-/// 3. 返回冲突级别
+/// 2. 区分"历史物流信号"和"当前状态信号"
+/// 3. 只有同层级矛盾才算真正冲突
 library;
+
+import 'status_resolver.dart';
+import '../models/package_status.dart';
 
 /// 冲突级别
 enum ParseConflictLevel {
   /// 无冲突
   none,
-  
+
   /// 低冲突（可能有噪音）
   low,
-  
-  /// 高冲突（transit 和 arrival 同时存在）
+
+  /// 高冲突（同层级矛盾）
   high,
 }
 
@@ -22,21 +25,24 @@ enum ParseConflictLevel {
 class ConflictAnalysisResult {
   /// 是否存在运输中信号
   final bool hasTransitSignals;
-  
+
   /// 是否存在已到达信号
   final bool hasArrivalSignals;
-  
+
   /// 是否存在取件信号
   final bool hasPickupSignals;
-  
+
   /// 冲突级别
   final ParseConflictLevel level;
-  
+
   /// 检测到的运输中关键词
   final List<String> detectedTransitKeywords;
-  
+
   /// 检测到的已到达关键词
   final List<String> detectedArrivalKeywords;
+
+  /// 状态解析结果
+  final ResolvedStatus resolvedStatus;
 
   const ConflictAnalysisResult({
     required this.hasTransitSignals,
@@ -45,18 +51,19 @@ class ConflictAnalysisResult {
     required this.level,
     this.detectedTransitKeywords = const [],
     this.detectedArrivalKeywords = const [],
+    required this.resolvedStatus,
   });
 
   /// 是否存在高冲突
   bool get isHighConflict => level == ParseConflictLevel.high;
-  
+
   /// 是否应该进入待确认区
   bool get shouldPendingConfirmation => isHighConflict;
 }
 
 /// OCR 冲突检测器
 class ConflictDetector {
-  /// 运输中信号关键词
+  /// 运输中信号关键词（历史 timeline event）
   static const List<String> _transitSignals = [
     '运输中', '已发往', '离开转运中心', '运输路线',
     '已发出', '已发货', '已揽收', '分拣中',
@@ -64,7 +71,7 @@ class ConflictDetector {
     '转运中心', '分拨中心', '集运仓',
   ];
 
-  /// 已到达/待取件信号关键词
+  /// 已到达/待取件信号关键词（当前状态）
   static const List<String> _arrivalSignals = [
     '待取件', '已放至代收点', '已到驿站', '请及时领取',
     '已到达', '已入库', '请取件', '来取',
@@ -82,36 +89,56 @@ class ConflictDetector {
   static ConflictAnalysisResult analyze(String text) {
     final detectedTransit = <String>[];
     final detectedArrival = <String>[];
-    
+
     // 检测运输中信号
     for (final keyword in _transitSignals) {
       if (text.contains(keyword)) {
         detectedTransit.add(keyword);
       }
     }
-    
+
     // 检测已到达信号
     for (final keyword in _arrivalSignals) {
       if (text.contains(keyword)) {
         detectedArrival.add(keyword);
       }
     }
-    
+
     // 检测取件动作信号
     final hasPickupSignals = _pickupSignals.any((kw) => text.contains(kw));
-    
+
     final hasTransitSignals = detectedTransit.isNotEmpty;
     final hasArrivalSignals = detectedArrival.isNotEmpty;
-    
-    // 判断冲突级别
+
+    // 使用 StatusResolver 解析最终状态
+    // 将检测到的关键词转换为 DetectedStatus 对象
+    final detectedStatuses = <DetectedStatus>[];
+    for (final keyword in detectedTransit) {
+      detectedStatuses.add(DetectedStatus(
+        status: PackageStatus.transit,
+        source: keyword,
+        confidence: 0.8,
+      ));
+    }
+    for (final keyword in detectedArrival) {
+      detectedStatuses.add(DetectedStatus(
+        status: PackageStatus.arrived,
+        source: keyword,
+        confidence: 0.9,
+      ));
+    }
+    final resolvedStatus = StatusResolver.resolve(detectedStatuses);
+
+    // 判断冲突级别（使用增强逻辑）
     final level = _determineConflictLevel(
       hasTransitSignals: hasTransitSignals,
       hasArrivalSignals: hasArrivalSignals,
       hasPickupSignals: hasPickupSignals,
       detectedTransit: detectedTransit,
       detectedArrival: detectedArrival,
+      resolvedStatus: resolvedStatus,
     );
-    
+
     return ConflictAnalysisResult(
       hasTransitSignals: hasTransitSignals,
       hasArrivalSignals: hasArrivalSignals,
@@ -119,28 +146,51 @@ class ConflictDetector {
       level: level,
       detectedTransitKeywords: detectedTransit,
       detectedArrivalKeywords: detectedArrival,
+      resolvedStatus: resolvedStatus,
     );
   }
 
-  /// 确定冲突级别
+  /// 确定冲突级别（增强版）
+  ///
+  /// 核心逻辑：
+  /// - 历史 + 当前 = 不冲突（正常快递详情页）
+  /// - 同层级矛盾 = 真冲突
   static ParseConflictLevel _determineConflictLevel({
     required bool hasTransitSignals,
     required bool hasArrivalSignals,
     required bool hasPickupSignals,
     required List<String> detectedTransit,
     required List<String> detectedArrival,
+    required ResolvedStatus resolvedStatus,
   }) {
-    // 高冲突：transit 和 arrival 同时存在
-    if (hasTransitSignals && hasArrivalSignals) {
+    // 如果 StatusResolver 检测到真冲突 → high
+    if (resolvedStatus.hasConflict) {
       return ParseConflictLevel.high;
     }
-    
-    // 低冲突：只有 arrival，但没有取件动作
-    if (hasArrivalSignals && !hasPickupSignals) {
+
+    // 如果只有 arrival 信号，没有 transit → none（正常到达）
+    if (hasArrivalSignals && !hasTransitSignals) {
+      return ParseConflictLevel.none;
+    }
+
+    // 如果只有 transit 信号，没有 arrival → none（正常运输中）
+    if (hasTransitSignals && !hasArrivalSignals) {
+      return ParseConflictLevel.none;
+    }
+
+    // 如果同时有 transit 和 arrival：
+    // 检查是否是"历史+当前"的正常组合
+    // 如果 arrival 信号中有"强到达信号"（取件码、驿站）→ low（不是真冲突）
+    final strongArrivalSignals = ['取件码', '驿站', '快递柜', '丰巢'];
+    final hasStrongArrival =
+        detectedArrival.any((kw) => strongArrivalSignals.contains(kw));
+
+    if (hasStrongArrival) {
+      // 有强到达信号 → 历史+当前的正常组合，低冲突
       return ParseConflictLevel.low;
     }
-    
-    // 无冲突
-    return ParseConflictLevel.none;
+
+    // 其他情况：transit + arrival 同时存在但没有强到达信号 → high
+    return ParseConflictLevel.high;
   }
 }
