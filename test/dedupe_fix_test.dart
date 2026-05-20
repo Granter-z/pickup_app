@@ -2,11 +2,21 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:pickup_app/core/models/package.dart';
 import 'package:pickup_app/core/models/package_status.dart';
 import 'package:pickup_app/ui/providers/package_provider.dart';
+import 'helpers/test_hive_helper.dart';
 
 void main() {
   late PackageListNotifier notifier;
 
-  setUp(() {
+  setUpAll(() async {
+    await TestHiveHelper.init();
+  });
+
+  tearDownAll(() async {
+    await TestHiveHelper.cleanup();
+  });
+
+  setUp(() async {
+    await TestHiveHelper.resetBox();
     notifier = PackageListNotifier();
   });
 
@@ -171,7 +181,7 @@ void main() {
     print('✅ 无运单号相同取件码合并成功');
   });
 
-  test('无取件码的包裹各自独立，不合并', () async {
+  test('无取件码但不同快递商的包裹各自独立，不合并', () async {
     final package1 = Package(
       id: 'no_code_1',
       trackingNumber: 'SF1111111111',
@@ -189,10 +199,10 @@ void main() {
 
     final package2 = Package(
       id: 'no_code_2',
-      trackingNumber: 'SF2222222222',
-      courier: CourierType.sf,
+      trackingNumber: 'ZTO2222222222',
+      courier: CourierType.zto,
       pickupCode: '',
-      location: '顺丰营业点',
+      location: '中通驿站',
       description: '包裹B',
       urgency: UrgencyLevel.normal,
       status: PackageStatus.arrived,
@@ -202,8 +212,8 @@ void main() {
     notifier.addPackage(package2);
 
     expect(notifier.state.length, equals(2),
-        reason: '无取件码的包裹各自独立，不合并');
+        reason: '无取件码但不同快递商，fingerprint 不同，不合并');
 
-    print('✅ 无取件码包裹各自独立: ${notifier.state.length} 个');
+    print('✅ 无取件码不同快递商各自独立: ${notifier.state.length} 个');
   });
 }

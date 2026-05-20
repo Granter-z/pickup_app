@@ -14,10 +14,10 @@ export '../../core/models/package.dart';
 export '../../core/models/package_status.dart';
 
 /// Hive持久化的Package模型
-/// 
+///
 /// 注意：这个类主要用于Hive序列化，
 /// 业务逻辑应该使用核心模型
-/// 
+///
 /// 适配器在 adapters/hive_adapters.dart 中定义
 class HivePackage {
   final String id;
@@ -35,6 +35,10 @@ class HivePackage {
   final DateTime? archivedAt;
   final String? transitFingerprint;  // transit 阶段的弱身份标识
   final String fingerprint;  // 包裹唯一识别指纹
+  final String rawLocation;        // OCR 原始提取
+  final String cleanedLocation;    // regex 清洗后
+  final String canonicalLocation;  // 最终可信地址
+  final double locationConfidence; // 地址置信度
 
   HivePackage({
     required this.id,
@@ -52,6 +56,10 @@ class HivePackage {
     this.archivedAt,
     this.transitFingerprint,
     String? fingerprint,
+    this.rawLocation = '',
+    this.cleanedLocation = '',
+    this.canonicalLocation = '',
+    this.locationConfidence = 0.0,
   }) : this.fingerprint = fingerprint ?? Package.buildFingerprintStatic(pickupCode, courier);
 
   /// 从核心模型创建
@@ -72,6 +80,10 @@ class HivePackage {
       archivedAt: package.archivedAt,
       transitFingerprint: package.transitFingerprint,
       fingerprint: package.fingerprint,
+      rawLocation: package.rawLocation,
+      cleanedLocation: package.cleanedLocation,
+      canonicalLocation: package.canonicalLocation,
+      locationConfidence: package.locationConfidence,
     );
   }
 
@@ -93,6 +105,10 @@ class HivePackage {
       archivedAt: archivedAt,
       transitFingerprint: transitFingerprint,
       fingerprint: fingerprint,
+      rawLocation: rawLocation,
+      cleanedLocation: cleanedLocation,
+      canonicalLocation: canonicalLocation,
+      locationConfidence: locationConfidence,
     );
   }
 
@@ -112,6 +128,10 @@ class HivePackage {
     DateTime? archivedAt,
     String? transitFingerprint,
     String? fingerprint,
+    String? rawLocation,
+    String? cleanedLocation,
+    String? canonicalLocation,
+    double? locationConfidence,
   }) {
     return HivePackage(
       id: id ?? this.id,
@@ -129,6 +149,10 @@ class HivePackage {
       archivedAt: archivedAt ?? this.archivedAt,
       transitFingerprint: transitFingerprint ?? this.transitFingerprint,
       fingerprint: fingerprint ?? this.fingerprint,
+      rawLocation: rawLocation ?? this.rawLocation,
+      cleanedLocation: cleanedLocation ?? this.cleanedLocation,
+      canonicalLocation: canonicalLocation ?? this.canonicalLocation,
+      locationConfidence: locationConfidence ?? this.locationConfidence,
     );
   }
 }

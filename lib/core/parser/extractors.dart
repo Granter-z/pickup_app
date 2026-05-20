@@ -131,9 +131,10 @@ class PickupCodeExtractor {
   /// 规范化取件码：合并连续横杠、去除首尾横杠、修正 OCR 误识别
   static String _normalizePickupCode(String code) {
     var normalized = code;
-    // 中文横杠转普通横杠
+    // 中文/日文横杠转普通横杠
     normalized = normalized.replaceAll('—', '-');
     normalized = normalized.replaceAll('－', '-');
+    normalized = normalized.replaceAll('ー', '-');  // 日文长音（U+30FC）OCR 常见误识别
     
     // 修正 OCR 字母转数字误识别：O → 0，o → 0，I → 1，l → 1
     normalized = normalized.replaceAll('O', '0');
@@ -142,9 +143,9 @@ class PickupCodeExtractor {
     normalized = normalized.replaceAll('l', '1');
     
     // 合并连续横杠：-- → -，--- → -，等等
-    normalized = normalized.replaceAll(RegExp(r'[-—－]{2,}'), '-');
+    normalized = normalized.replaceAll(RegExp(r'[-—－ー]{2,}'), '-');
     // 去除首尾横杠
-    normalized = normalized.replaceAll(RegExp(r'^[-—－]+|[-—－]+$'), '');
+    normalized = normalized.replaceAll(RegExp(r'^[-—－ー]+|[-—－ー]+$'), '');
     return normalized;
   }
   

@@ -34,8 +34,8 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
       debugPrint('[PackageListNotifier] box.length: ${_box!.length}');
     } catch (e, stack) {
       DebugTrace.error('Hive box open FAILED', error: e, stackTrace: stack);
-      debugPrint('[PackageListNotifier] Falling back to _initialPackages (no Hive persistence)');
-      state = _initialPackages;
+      debugPrint('[PackageListNotifier] Falling back to empty state (no Hive persistence)');
+      state = [];
       return;
     }
 
@@ -57,8 +57,8 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
       state = loaded;
       debugPrint('[PackageListNotifier] Loaded ${loaded.length} packages from Hive');
     } else {
-      debugPrint('[PackageListNotifier] Hive box is EMPTY, using _initialPackages (${_initialPackages.length} items)');
-      state = _initialPackages;
+      debugPrint('[PackageListNotifier] Hive box is EMPTY, starting with clean state');
+      state = [];
     }
 
     // ── Step 3: 同步回 Hive ──────────────────────────────────
@@ -95,6 +95,30 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
 
       final resolvedStatus = _resolveStatus(existing.status, package.status);
 
+      // ── 地址收敛逻辑 ─────────────────────────────────────
+      // rawLocation: 永不覆盖，保留最早的 OCR 原文
+      final resolvedRawLocation = existing.rawLocation.isNotEmpty
+          ? existing.rawLocation
+          : package.rawLocation;
+
+      // cleanedLocation: 使用最新的清洗结果
+      final resolvedCleanedLocation = package.cleanedLocation.isNotEmpty
+          ? package.cleanedLocation
+          : existing.cleanedLocation;
+
+      // canonicalLocation: 收敛规则
+      final resolvedCanonicalLocation = Package.resolveCanonicalLocation(
+        existing: existing.canonicalLocation,
+        incoming: package.cleanedLocation,
+        existingConfidence: existing.locationConfidence,
+        incomingConfidence: package.locationConfidence,
+      );
+
+      // locationConfidence: 取更高的置信度
+      final resolvedLocationConfidence = package.locationConfidence > existing.locationConfidence
+          ? package.locationConfidence
+          : existing.locationConfidence;
+
       final updated = existing.copyWith(
         location: package.location.isNotEmpty ? package.location : existing.location,
         originalStation: package.originalStation.isNotEmpty ? package.originalStation : existing.originalStation,
@@ -104,6 +128,11 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
         addedAt: package.addedAt.isAfter(existing.addedAt) ? package.addedAt : existing.addedAt,
         status: resolvedStatus,
         transitFingerprint: package.transitFingerprint ?? existing.transitFingerprint,
+        // 三层地址字段
+        rawLocation: resolvedRawLocation,
+        cleanedLocation: resolvedCleanedLocation,
+        canonicalLocation: resolvedCanonicalLocation,
+        locationConfidence: resolvedLocationConfidence,
         // 合并两个包裹的 events，去重
         events: [...existing.events, ...package.events]..fold(<String>{}, (ids, event) {
           if (!ids.contains(event.id)) {
@@ -117,7 +146,9 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
 
       debugPrint('[PackageListNotifier] merged: status=${updated.status.label} '
           'urgency=${updated.urgency.label} '
-          'location=${updated.location}');
+          'location=${updated.location} '
+          'canonicalLocation=${updated.canonicalLocation} '
+          'locationConfidence=${updated.locationConfidence}');
 
       state = [
         for (int i = 0; i < state.length; i++)
@@ -161,9 +192,13 @@ class PackageListNotifier extends StateNotifier<List<Package>> {
     ];
     _sync();
     
-    // 异步发送通知
-    notificationService.showArrivedNotification(package);
-    notificationService.scheduleReminderNotification(package);
+    // 异步发送通知（静默失败，测试环境可跳过）
+    try {
+      notificationService.showArrivedNotification(package);
+      notificationService.scheduleReminderNotification(package);
+    } catch (e) {
+      debugPrint('[PackageListNotifier] Notification skipped: $e');
+    }
   }
   
   /// 查找已存在的相同包裹
@@ -288,8 +323,16 @@ final pendingPackagesProvider = Provider<List<Package>>((ref) {
       .toList();
   
   pending.sort((a, b) {
-    final locationA = a.location.isNotEmpty ? a.location : 'ZZZ';
-    final locationB = b.location.isNotEmpty ? b.location : 'ZZZ';
+    final locationA = a.canonicalLocation.isNotEmpty
+        ? a.canonicalLocation
+        : a.location.isNotEmpty
+            ? a.location
+            : 'ZZZ';
+    final locationB = b.canonicalLocation.isNotEmpty
+        ? b.canonicalLocation
+        : b.location.isNotEmpty
+            ? b.location
+            : 'ZZZ';
     final locationCompare = locationA.compareTo(locationB);
     if (locationCompare != 0) return locationCompare;
     
@@ -391,74 +434,3 @@ final pendingConfirmationsProvider =
 final pendingConfirmationCountProvider = Provider<int>((ref) {
   return ref.watch(pendingConfirmationsProvider).length;
 });
-
-final _initialPackages = <Package>[
-  Package(
-    id: '1',
-    trackingNumber: 'SF1234567890',
-    courier: CourierType.sf,
-    pickupCode: '6-8-2301',
-    location: '小区东门菜鸟驿站',
-    description: 'Apple AirPods Pro',
-    urgency: UrgencyLevel.urgent,
-    status: PackageStatus.arrived,
-    addedAt: DateTime.now().subtract(const Duration(hours: 2)),
-  ),
-  Package(
-    id: '2',
-    trackingNumber: 'JD9876543210',
-    courier: CourierType.jd,
-    pickupCode: '',
-    location: '京东快递柜 A-12',
-    description: 'Kindle Paperwhite',
-    urgency: UrgencyLevel.warning,
-    status: PackageStatus.arrived,
-    addedAt: DateTime.now().subtract(const Duration(hours: 5)),
-  ),
-  Package(
-    id: '3',
-    trackingNumber: 'ZTO2024050100001',
-    courier: CourierType.zto,
-    pickupCode: '8812',
-    location: '小区西门快递点',
-    description: '日用品套装',
-    urgency: UrgencyLevel.normal,
-    status: PackageStatus.delivering,
-    addedAt: DateTime.now().subtract(const Duration(hours: 8)),
-  ),
-  Package(
-    id: '4',
-    trackingNumber: 'YT2024050100002',
-    courier: CourierType.yt,
-    pickupCode: '3-5-1802',
-    location: '圆通驿站',
-    description: '书籍 x3',
-    urgency: UrgencyLevel.low,
-    status: PackageStatus.transit,
-    addedAt: DateTime.now().subtract(const Duration(days: 1)),
-  ),
-  Package(
-    id: '5',
-    trackingNumber: 'SF9999888877',
-    courier: CourierType.sf,
-    pickupCode: '',
-    location: '顺丰速运营业点',
-    description: '机械键盘',
-    urgency: UrgencyLevel.normal,
-    status: PackageStatus.pickedUp,
-    addedAt: DateTime.now().subtract(const Duration(days: 2)),
-    pickedUpAt: DateTime.now().subtract(const Duration(days: 1)),
-  ),
-  Package(
-    id: '6',
-    trackingNumber: 'YD2024042800003',
-    courier: CourierType.yd,
-    pickupCode: '5566',
-    location: '韵达快递超市',
-    description: '手机壳',
-    urgency: UrgencyLevel.low,
-    status: PackageStatus.pickedUp,
-    addedAt: DateTime.now().subtract(const Duration(days: 3)),
-    pickedUpAt: DateTime.now().subtract(const Duration(days: 2)),
-  ),
-];

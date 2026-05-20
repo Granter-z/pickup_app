@@ -2,6 +2,7 @@
 // 从提取结果计算字段和整体置信度
 
 import 'package:pickup_app/core/models/courier_type.dart';
+import 'location_quality_analyzer.dart';
 
 /// 置信度权重配置
 class ConfidenceWeights {
@@ -26,16 +27,39 @@ class ConfidenceWeights {
   }
 }
 
+/// 语义置信度配置
+class SemanticConfidenceWeights {
+  const SemanticConfidenceWeights({
+    this.extractionWeight = 0.6,
+    this.semanticWeight = 0.4,
+  });
+
+  /// 提取置信度权重
+  final double extractionWeight;
+
+  /// 语义置信度权重
+  final double semanticWeight;
+
+  /// 验证权重和为 1.0
+  bool get isValid {
+    return (extractionWeight + semanticWeight - 1.0).abs() < 0.01;
+  }
+}
+
 /// 置信度计算器
 /// 负责从各个字段的提取结果计算置信度分数
 class ConfidenceCalculator {
   ConfidenceCalculator({
     ConfidenceWeights? weights,
-  }) : weights = weights ?? const ConfidenceWeights() {
+    SemanticConfidenceWeights? semanticWeights,
+  }) : weights = weights ?? const ConfidenceWeights(),
+       semanticWeights = semanticWeights ?? const SemanticConfidenceWeights() {
     assert(this.weights.isValid, 'Confidence weights must sum to 1.0');
+    assert(this.semanticWeights.isValid, 'Semantic confidence weights must sum to 1.0');
   }
 
   final ConfidenceWeights weights;
+  final SemanticConfidenceWeights semanticWeights;
 
   /// 计算快递商字段的置信度
   ///
@@ -220,6 +244,41 @@ class ConfidenceCalculator {
     return weighted.clamp(0.0, 1.0);
   }
 
+  /// 计算整合语义的整体置信度
+  ///
+  /// 公式：
+  /// overallConfidence = (extractionConfidence * 0.6) + (semanticConfidence * 0.4)
+  ///
+  /// 参数：
+  /// - extractionConfidence: 提取置信度（字段提取成功率）
+  /// - semanticConfidence: 语义置信度（语义合理性）
+  double calculateOverallConfidenceWithSemantic({
+    required double extractionConfidence,
+    required double semanticConfidence,
+  }) {
+    final weighted =
+      (extractionConfidence * semanticWeights.extractionWeight) +
+      (semanticConfidence * semanticWeights.semanticWeight);
+
+    return weighted.clamp(0.0, 1.0);
+  }
+
+  /// 计算地址的语义置信度
+  ///
+  /// 使用 LocationQualityAnalyzer 分析地址的语义合理性
+  double calculateLocationSemanticConfidence({
+    required String rawLocation,
+    required String cleanedLocation,
+    String originalStation = '',
+  }) {
+    final result = LocationQualityAnalyzer.analyze(
+      rawLocation: rawLocation,
+      cleanedLocation: cleanedLocation,
+      originalStation: originalStation,
+    );
+    return result.score;
+  }
+
   // ============ 辅助方法 ============
 
   /// 是否是已知的快递商
@@ -269,4 +328,9 @@ class ConfidenceThresholds {
   static const double autoResolve = 0.85;      // ≥ 0.85: 自动生成 Package
   static const double needsConfirmation = 0.60; // 0.60-0.85: 需要用户确认
   // < 0.60: 拒绝
+
+  /// 语义置信度阈值
+  static const double semanticHigh = 0.90;     // ≥ 0.90: 语义可信
+  static const double semanticMedium = 0.70;   // 0.70-0.89: 建议确认
+  // < 0.70: 进入待确认
 }

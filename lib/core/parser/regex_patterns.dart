@@ -37,17 +37,17 @@ class RegexPatterns {
 
   /// 带标签的取件码
   static final labeledPickupCode = RegExp(
-    r'(?:取件码|取货码|提取码|验证码|凭码|收件码)[：:\s]*([A-Za-z0-9\-—－]{2,20})',
+    r'(?:取件码|取货码|提取码|验证码|凭码|收件码)[：:\s]*([A-Za-z0-9\-—－ー]{2,20})',
   );
   
   /// 短格式取件码
   static final shortPickupCode = RegExp(
-    r'码[：:\s]*([A-Za-z0-9\-—－]{2,20})',
+    r'码[：:\s]*([A-Za-z0-9\-—－ー]{2,20})',
   );
   
   /// Bay格式取件码
   static final bayFormatCode = RegExp(
-    r'\b(\d{1,2})[\-—－](\d{1,2})[\-—－](\d{2,4})\b',
+    r'\b(\d{1,2})[\-—－ー](\d{1,2})[\-—－ー](\d{2,4})\b',
   );
   
   /// 纯数字取件码（4-8位）
