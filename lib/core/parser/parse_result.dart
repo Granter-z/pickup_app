@@ -37,6 +37,32 @@ class ParseResult {
     this.overallConfidence = 0.0,
   });
 
+  ParseResult copyWith({
+    ExtractionResult<CourierType>? courier,
+    ExtractionResult<String>? pickupCode,
+    ExtractionResult<String>? trackingNumber,
+    ExtractionResult<String>? phoneTail,
+    ExtractionResult<String>? location,
+    LocationType? locationType,
+    ExtractionResult<String>? station,
+    ExtractionResult<PackageStatus>? status,
+    List<String>? warnings,
+    double? overallConfidence,
+  }) {
+    return ParseResult(
+      courier: courier ?? this.courier,
+      pickupCode: pickupCode ?? this.pickupCode,
+      trackingNumber: trackingNumber ?? this.trackingNumber,
+      phoneTail: phoneTail ?? this.phoneTail,
+      location: location ?? this.location,
+      locationType: locationType ?? this.locationType,
+      station: station ?? this.station,
+      status: status ?? this.status,
+      warnings: warnings ?? this.warnings,
+      overallConfidence: overallConfidence ?? this.overallConfidence,
+    );
+  }
+
   /// 是否为有效解析结果
   bool get isValid {
     // 至少需要有快递公司或运单号

@@ -131,9 +131,10 @@ class PickupCodeExtractor {
   /// 规范化取件码：合并连续横杠、去除首尾横杠、修正 OCR 误识别
   static String _normalizePickupCode(String code) {
     var normalized = code;
-    // 中文横杠转普通横杠
+    // 中文/日文横杠转普通横杠
     normalized = normalized.replaceAll('—', '-');
     normalized = normalized.replaceAll('－', '-');
+    normalized = normalized.replaceAll('ー', '-');  // 日文长音（U+30FC）OCR 常见误识别
     
     // 修正 OCR 字母转数字误识别：O → 0，o → 0，I → 1，l → 1
     normalized = normalized.replaceAll('O', '0');
@@ -142,9 +143,9 @@ class PickupCodeExtractor {
     normalized = normalized.replaceAll('l', '1');
     
     // 合并连续横杠：-- → -，--- → -，等等
-    normalized = normalized.replaceAll(RegExp(r'[-—－]{2,}'), '-');
+    normalized = normalized.replaceAll(RegExp(r'[-—－ー]{2,}'), '-');
     // 去除首尾横杠
-    normalized = normalized.replaceAll(RegExp(r'^[-—－]+|[-—－]+$'), '');
+    normalized = normalized.replaceAll(RegExp(r'^[-—－ー]+|[-—－ー]+$'), '');
     return normalized;
   }
   
@@ -332,23 +333,26 @@ class LocationExtractor {
       }
     }
 
-    // Priority 0.5: "收 xxx" 格式（极兔等快递使用）
-    // 匹配独立行的 "收 地址内容"
-    final receiveMatch = RegExp(r'\n\s*收\s+([\u4e00-\u9fa5][\u4e00-\u9fa5\d\-]{4,40})')
-        .firstMatch(text);
-    if (receiveMatch != null) {
-      var loc = receiveMatch.group(1) ?? '';
-      if (loc.length >= 6 && !_isLogisticsNode(loc)) {
-        return LocationParseResult(
-          value: loc,
-          type: LocationType.pickupStation,
-          confidence: 0.88,
-          source: 'receive_format',
-        );
+    // Priority 1: 地点标题格式2
+    final title2Match = RegexPatterns.locationTitle2.firstMatch(text);
+    if (title2Match != null) {
+      var loc = TextPreprocessor.cleanLocation(title2Match.group(1)!.trim());
+      if (loc.length >= 6 && !TextPreprocessor.isAdText(loc)) {
+        final type = _determineLocationType(loc);
+        if (type == LocationType.transitCenter) {
+          // 跳过，继续尝试
+        } else {
+          return LocationParseResult(
+            value: loc,
+            type: type,
+            confidence: type == LocationType.pickupStation ? 0.85 : 0.3,
+            source: 'title_pattern_2',
+          );
+        }
       }
     }
 
-    // Priority 1: 地点标题格式1
+    // Priority 2: 地点标题格式1
     final title1Match = RegexPatterns.locationTitle1.firstMatch(text);
     if (title1Match != null) {
       var loc = TextPreprocessor.cleanLocation(title1Match.group(1)!.trim());
@@ -363,25 +367,6 @@ class LocationExtractor {
             type: type,
             confidence: type == LocationType.pickupStation ? 0.9 : 0.3,
             source: 'title_pattern_1',
-          );
-        }
-      }
-    }
-
-    // Priority 2: 地点标题格式2
-    final title2Match = RegexPatterns.locationTitle2.firstMatch(text);
-    if (title2Match != null) {
-      var loc = TextPreprocessor.cleanLocation(title2Match.group(1)!.trim());
-      if (loc.length >= 6 && !TextPreprocessor.isAdText(loc)) {
-        final type = _determineLocationType(loc);
-        if (type == LocationType.transitCenter) {
-          // 跳过，继续尝试
-        } else {
-          return LocationParseResult(
-            value: loc,
-            type: type,
-            confidence: type == LocationType.pickupStation ? 0.85 : 0.3,
-            source: 'title_pattern_2',
           );
         }
       }
@@ -405,6 +390,21 @@ class LocationExtractor {
             source: 'arrival_format',
           );
         }
+      }
+    }
+
+    // Priority 3.5: "收 xxx" 格式（极兔等运输中详情常见）
+    final receiveMatch = RegExp(r'(?:^|\n)\s*收\s*(?!件|货|入)([\u4e00-\u9fa5][\u4e00-\u9fa5\d\-]{4,40})')
+        .firstMatch(text);
+    if (receiveMatch != null) {
+      var loc = receiveMatch.group(1) ?? '';
+      if (loc.length >= 6 && !_isLogisticsNode(loc)) {
+        return LocationParseResult(
+          value: loc,
+          type: LocationType.pickupStation,
+          confidence: 0.88,
+          source: 'receive_format',
+        );
       }
     }
 
@@ -514,6 +514,18 @@ class TrackingNumberExtractor {
     return number.replaceAll(RegExp(r'[\s\t]+'), '');
   }
 
+  static String _stripCourierNamePrefix(String value) {
+    return value
+        .replaceFirst(
+          RegExp(
+            r'^(?:中通速递|中通快递|中通|圆通速递|圆通|申通快递|申通|韵达快递|韵达|极兔速递|极兔|顺丰速运|顺丰|京东|EMS|邮政|德邦|百世)\s*[：:]?\s*',
+            caseSensitive: false,
+          ),
+          '',
+        )
+        .trim();
+  }
+
   static ExtractionResult<String> extract(String text) {
     // Priority 1: 带标签的运单号
     final labelMatch = RegexPatterns.labeledTrackingNumber.firstMatch(text);
@@ -530,7 +542,7 @@ class TrackingNumberExtractor {
     if (courierMatch != null) {
       var fullMatch = courierMatch.group(0) ?? '';
       fullMatch = _normalizeTrackingNumber(fullMatch);
-      final pureNumber = courierMatch.group(1) ?? fullMatch;
+      final pureNumber = _stripCourierNamePrefix(courierMatch.group(1) ?? fullMatch);
       return ExtractionResult(
         value: pureNumber.isNotEmpty ? _normalizeTrackingNumber(pureNumber) : fullMatch,
         confidence: 0.9,
@@ -543,8 +555,9 @@ class TrackingNumberExtractor {
     if (looseCourierMatch != null) {
       var fullMatch = looseCourierMatch.group(0) ?? '';
       fullMatch = _normalizeTrackingNumber(fullMatch);
+      final pureNumber = _stripCourierNamePrefix(fullMatch);
       return ExtractionResult(
-        value: fullMatch,
+        value: pureNumber.isNotEmpty ? _normalizeTrackingNumber(pureNumber) : fullMatch,
         confidence: 0.82,
         source: 'loose_courier_tracking',
       );
